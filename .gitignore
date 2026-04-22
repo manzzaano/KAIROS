@@ -1,0 +1,32 @@
+# BACKEND (Python)
+backend/venv/
+backend/.env
+backend/__pycache__/
+*.py[cod]
+*$py.class
+*.sqlite3
+# NUNCA subir variables de entorno:
+backend/.env
+
+# FRONTEND (Flutter / Dart)
+frontend/.dart_tool/
+frontend/build/
+frontend/.idea/
+frontend/.vscode/
+frontend/*.iml
+frontend/.flutter-plugins
+frontend/.flutter-plugins-dependencies
+frontend/.pub-cache/
+frontend/.packages
+frontend/coverage/
+frontend/lib/generated_plugin_registrant.dart
+
+# NUNCA subir firmas ni claves de Android/iOS:
+frontend/android/key.properties
+frontend/**/*.jks
+frontend/**/*.keystore
+frontend/ios/ServiceDefinitions.json
+frontend/ios/Podfile.lock
+
+# NUNCA subir variables de entorno del frontend:
+frontend/.env
