@@ -39,12 +39,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: RadialGradient(
-            colors: [KairosColors.shadow, KairosColors.black],
-            radius: 0.95,
-          ),
-        ),
+        color: KairosColors.neutral900,
         child: Center(
           child: FadeTransition(
             opacity: _fade,
@@ -54,10 +49,10 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                 const DoricColumn(width: 120, height: 280),
                 const SizedBox(height: 44),
                 Text(Strings.appName,
-                    style: KairosTheme.serif(size: 46, weight: FontWeight.w300, color: KairosColors.bone)),
+                    style: KairosTheme.serif(size: 46, weight: FontWeight.w300, color: KairosColors.neutral50)),
                 const SizedBox(height: 10),
                 Text(Strings.appTagline,
-                    style: KairosTheme.mono(size: 10, color: KairosColors.bronze, letterSpacing: 6)),
+                    style: KairosTheme.mono(size: 10, color: KairosColors.neutral400, letterSpacing: 2)),
                 const SizedBox(height: 72),
                 SizedBox(
                   width: 96,
@@ -71,7 +66,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                 ),
                 const SizedBox(height: 40),
                 Text(Strings.copyright,
-                    style: KairosTheme.mono(size: 9, color: KairosColors.muted, letterSpacing: 3)),
+                    style: KairosTheme.mono(size: 9, color: KairosColors.neutral400, letterSpacing: 2)),
               ],
             ),
           ),
@@ -88,11 +83,11 @@ class _HairlinePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final bg = Paint()
-      ..color = KairosColors.hairline
+      ..color = KairosColors.neutral700
       ..strokeWidth = 1;
     canvas.drawLine(Offset(0, size.height / 2), Offset(size.width, size.height / 2), bg);
     final fg = Paint()
-      ..color = KairosColors.bronze
+      ..color = KairosColors.neutral50
       ..strokeWidth = 1;
     final segW = size.width * 0.35;
     final x = (size.width + segW) * t - segW;

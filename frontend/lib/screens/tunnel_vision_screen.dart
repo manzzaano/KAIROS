@@ -78,26 +78,26 @@ class _Header extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(Strings.tunnel, style: KairosTheme.mono(size: 11, color: KairosColors.bronze, letterSpacing: 6)),
+              Text(Strings.tunnel, style: KairosTheme.mono(size: 11, color: KairosColors.neutral700, letterSpacing: 6)),
               GestureDetector(
                 onTap: () => context.go(Routes.dashboard),
                 child: Text(Strings.tunnelClose,
-                    style: KairosTheme.mono(size: 10, color: KairosColors.muted, letterSpacing: 3)),
+                    style: KairosTheme.mono(size: 10, color: KairosColors.neutral400, letterSpacing: 3)),
               ),
             ],
           ),
           const SizedBox(height: 14),
           Text('MARTES · 22 DE ABR, MMXXVI',
-              style: KairosTheme.serif(size: 18, color: KairosColors.bone)),
+              style: KairosTheme.serif(size: 18, color: KairosColors.neutral50)),
           const SizedBox(height: 8),
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(Strings.tunnelNow,
-                  style: KairosTheme.mono(size: 10, color: KairosColors.bronze, letterSpacing: 4)),
+                  style: KairosTheme.mono(size: 10, color: KairosColors.neutral700, letterSpacing: 4)),
               const SizedBox(width: 12),
               Text('10:47',
-                  style: KairosTheme.mono(size: 44, color: KairosColors.bone, letterSpacing: 2, weight: FontWeight.w300)),
+                  style: KairosTheme.mono(size: 44, color: KairosColors.neutral50, letterSpacing: 2, weight: FontWeight.w300)),
             ],
           ),
         ],
@@ -115,15 +115,15 @@ class _BottomBar extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 20),
               decoration: BoxDecoration(
-                color: primary ? KairosColors.bronze : Colors.transparent,
-                border: const Border(top: BorderSide(color: KairosColors.hairline, width: 1)),
+                color: primary ? KairosColors.neutral700 : Colors.transparent,
+                border: const Border(top: BorderSide(color: KairosColors.neutral300, width: 1)),
               ),
               child: Center(
                 child: Text(
                   label,
                   style: KairosTheme.mono(
                     size: 11,
-                    color: primary ? KairosColors.black : KairosColors.bone,
+                    color: primary ? KairosColors.neutral900 : KairosColors.neutral50,
                     letterSpacing: 4,
                     weight: primary ? FontWeight.w600 : FontWeight.w400,
                   ),

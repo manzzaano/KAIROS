@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart';
 
 import 'providers/auth_provider.dart';
+import 'providers/task_provider.dart';
 import 'router.dart';
 import 'utils/theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  await dotenv.load(fileName: ".env");
+  await dotenv.load(fileName: '.env');
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()..bootstrap()),
+        ChangeNotifierProvider(create: (_) => TaskProvider()),
       ],
       child: const KairosApp(),
     ),

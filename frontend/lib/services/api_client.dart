@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'storage_service.dart';
@@ -147,6 +149,197 @@ class ApiClient {
       throw Exception(_extractError(e, 'Inicio con $provider falló'));
     }
   }
+
+  Future<Map<String, dynamic>> createTask({
+    required String title,
+    required int priority,
+    required int energy,
+    required int estimatedMinutes,
+    double? latitude,
+    double? longitude,
+  }) async {
+    try {
+      final body = <String, dynamic>{
+        'title': title,
+        'priority': priority,
+        'energy': energy,
+        'estimated_minutes': estimatedMinutes,
+        if (latitude != null) 'latitude': latitude,
+        if (longitude != null) 'longitude': longitude,
+      };
+      final response = await _postWithRetry('/tasks/create', body, 'create-task');
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        throw Exception('Crear tarea falló: ${response.statusCode}');
+      }
+      return Map<String, dynamic>.from(response.data);
+    } on DioException catch (e) {
+      throw Exception(_extractError(e, 'Crear tarea falló'));
+    }
+  }
+
+  // ─── Tasks CRUD ─────────────────────────────────────────────────────────────
+
+  Future<Map<String, dynamic>> getTasksList({String status = 'all'}) async {
+    try {
+      _log('[list-tasks] GET /tasks/list?status=$status');
+      final resp = await dio.get('/tasks/list', queryParameters: {'status': status});
+      _log('[list-tasks] OK · ${resp.statusCode}');
+      return Map<String, dynamic>.from(resp.data);
+    } on DioException catch (e) {
+      throw Exception(_extractError(e, 'Listar tareas falló'));
+    }
+  }
+
+  Future<Map<String, dynamic>> getTask(int taskId) async {
+    try {
+      _log('[get-task] GET /tasks/$taskId');
+      final resp = await dio.get('/tasks/$taskId');
+      _log('[get-task] OK · ${resp.statusCode}');
+      return Map<String, dynamic>.from(resp.data);
+    } on DioException catch (e) {
+      throw Exception(_extractError(e, 'Obtener tarea falló'));
+    }
+  }
+
+  Future<Map<String, dynamic>> completeTask(int taskId) async {
+    try {
+      _log('[complete-task] PUT /tasks/$taskId/complete');
+      final resp = await dio.put('/tasks/$taskId/complete', data: {});
+      _log('[complete-task] OK · ${resp.statusCode}');
+      return Map<String, dynamic>.from(resp.data);
+    } on DioException catch (e) {
+      throw Exception(_extractError(e, 'Completar tarea falló'));
+    }
+  }
+
+  Future<Map<String, dynamic>> abandonTask(int taskId) async {
+    try {
+      _log('[abandon-task] PUT /tasks/$taskId/abandon');
+      final resp = await dio.put('/tasks/$taskId/abandon', data: {});
+      _log('[abandon-task] OK · ${resp.statusCode}');
+      return Map<String, dynamic>.from(resp.data);
+    } on DioException catch (e) {
+      throw Exception(_extractError(e, 'Abandonar tarea falló'));
+    }
+  }
+
+  Future<void> deleteTask(int taskId) async {
+    try {
+      _log('[delete-task] DELETE /tasks/$taskId');
+      await dio.delete('/tasks/$taskId');
+      _log('[delete-task] OK');
+    } on DioException catch (e) {
+      throw Exception(_extractError(e, 'Eliminar tarea falló'));
+    }
+  }
+
+  // ─── Debt ────────────────────────────────────────────────────────────────────
+
+  Future<Map<String, dynamic>> getProductivityDebt() async {
+    try {
+      _log('[get-debt] GET /tasks/debt');
+      final resp = await dio.get('/tasks/debt');
+      _log('[get-debt] OK · ${resp.statusCode}');
+      return Map<String, dynamic>.from(resp.data);
+    } on DioException catch (e) {
+      throw Exception(_extractError(e, 'Obtener deuda falló'));
+    }
+  }
+
+  Future<Map<String, dynamic>> payDebt(int minutesPaid) async {
+    try {
+      final resp = await _postWithRetry(
+        '/tasks/debt/pay',
+        {'minutes_paid': minutesPaid},
+        'pay-debt',
+      );
+      return Map<String, dynamic>.from(resp.data);
+    } on DioException catch (e) {
+      throw Exception(_extractError(e, 'Pagar deuda falló'));
+    }
+  }
+
+  // ─── Geofence ────────────────────────────────────────────────────────────────
+
+  Future<Map<String, dynamic>> validateZone(
+    int taskId, {
+    required double userLatitude,
+    required double userLongitude,
+  }) async {
+    try {
+      final resp = await _postWithRetry(
+        '/tasks/$taskId/validate-zone',
+        {'user_latitude': userLatitude, 'user_longitude': userLongitude},
+        'validate-zone-$taskId',
+      );
+      return Map<String, dynamic>.from(resp.data);
+    } on DioException catch (e) {
+      throw Exception(_extractError(e, 'Validar zona falló'));
+    }
+  }
+
+  // ─── Confessional ────────────────────────────────────────────────────────────
+
+  Stream<String> getReflectionStream() async* {
+    try {
+      _log('[reflect] POST /confessional/reflect (stream)');
+      final response = await dio.post<ResponseBody>(
+        '/confessional/reflect',
+        options: Options(
+          responseType: ResponseType.stream,
+          headers: {'Accept': 'text/event-stream'},
+        ),
+      );
+
+      final buffer = StringBuffer();
+
+      await for (final bytes in response.data!.stream) {
+        buffer.write(utf8.decode(bytes, allowMalformed: true));
+
+        final text = buffer.toString();
+        buffer.clear();
+
+        int searchFrom = 0;
+        while (true) {
+          final idx = text.indexOf('\n\n', searchFrom);
+          if (idx == -1) {
+            buffer.write(text.substring(searchFrom));
+            break;
+          }
+          final message = text.substring(searchFrom, idx);
+          searchFrom = idx + 2;
+
+          for (final line in message.split('\n')) {
+            if (!line.startsWith('data: ')) continue;
+            final raw = line.substring(6).trim();
+            if (raw.isEmpty) continue;
+            try {
+              final data = jsonDecode(raw) as String;
+              if (data == '[DONE]') return;
+              yield data;
+            } catch (_) {
+              if (raw != '[DONE]') yield raw;
+            }
+          }
+        }
+      }
+    } on DioException catch (e) {
+      throw Exception(_extractError(e, 'Streaming reflexión falló'));
+    }
+  }
+
+  Future<Map<String, dynamic>> getDebtSeverity() async {
+    try {
+      _log('[debt-severity] GET /confessional/debt-severity');
+      final resp = await dio.get('/confessional/debt-severity');
+      _log('[debt-severity] OK · ${resp.statusCode}');
+      return Map<String, dynamic>.from(resp.data);
+    } on DioException catch (e) {
+      throw Exception(_extractError(e, 'Obtener severidad de deuda falló'));
+    }
+  }
+
+  // ─── Optimize (Gemini) ───────────────────────────────────────────────────────
 
   Future<Map<String, dynamic>> optimizeTasks(
       List<Map<String, dynamic>> tasks) async {

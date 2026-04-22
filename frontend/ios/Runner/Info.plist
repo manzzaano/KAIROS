@@ -2,6 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>KAIROS necesita tu ubicación para validar zonas de trabajo.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>KAIROS necesita tu ubicación en background para tracking de zonas.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>KAIROS necesita acceso a tu ubicación siempre.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>

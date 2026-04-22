@@ -23,22 +23,34 @@ class StoicInput extends StatelessWidget {
       children: [
         Text(
           label.toUpperCase(),
-          style: KairosTheme.mono(size: 10, color: KairosColors.bronze, letterSpacing: 3),
+          style: KairosTheme.mono(size: 10, color: KairosColors.neutral400, letterSpacing: 2),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 8),
         TextField(
           controller: controller,
           obscureText: obscure,
           keyboardType: keyboardType,
-          cursorColor: KairosColors.bronzeLight,
+          cursorColor: KairosColors.neutral50,
           cursorWidth: 1,
-          style: KairosTheme.serif(size: 22, color: KairosColors.bone),
-          decoration: const InputDecoration(
+          style: KairosTheme.serif(size: 16, color: KairosColors.neutral50),
+          decoration: InputDecoration(
             isDense: true,
-            contentPadding: EdgeInsets.symmetric(vertical: 8),
-            border: UnderlineInputBorder(borderSide: BorderSide(color: KairosColors.muted)),
-            enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: KairosColors.muted)),
-            focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: KairosColors.bronzeLight, width: 2)),
+            filled: true,
+            fillColor: KairosColors.neutral700.withOpacity(0.25),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            hintStyle: KairosTheme.serif(size: 16, color: KairosColors.neutral400),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: KairosColors.neutral50, width: 1),
+            ),
           ),
         ),
       ],

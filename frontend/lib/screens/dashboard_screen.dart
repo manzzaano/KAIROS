@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../models/task.dart';
 import '../providers/auth_provider.dart';
+import '../providers/task_provider.dart';
 import '../utils/constants.dart';
 import '../utils/strings.dart';
 import '../utils/theme.dart';
@@ -17,15 +17,13 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  final List<Task> _tasks = [
-    Task(id: '1', title: 'Reportar errores críticos', priority: 3, energy: 4),
-    Task(id: '2', title: 'Reunión con el consejo', priority: 2, energy: 2),
-    Task(id: '3', title: 'Revisión de código · PR XLII', priority: 2, energy: 3),
-    Task(id: '4', title: 'Responder correspondencia', priority: 1, energy: 1),
-    Task(id: '5', title: 'Refactorizar módulo de autenticación', priority: 3, energy: 5),
-  ];
-
-  void _toggleTask(int i, Task t) => setState(() => _tasks[i] = t);
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<TaskProvider>().fetchTasks();
+    });
+  }
 
   Future<void> _logout() async {
     await context.read<AuthProvider>().logout();
@@ -36,6 +34,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
+    final taskProvider = context.watch<TaskProvider>();
+    final tasks = taskProvider.tasks;
     final username = (auth.user?.username.isNotEmpty ?? false)
         ? auth.user!.username
         : (auth.user?.email ?? 'ASPIRANT');
@@ -63,7 +63,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               alignment: Alignment.centerLeft,
               child: Text(
                 '${Strings.aspirant} · ${username.toUpperCase()}',
-                style: KairosTheme.mono(size: 9, color: KairosColors.bronze, letterSpacing: 3),
+                style: KairosTheme.mono(size: 9, color: KairosColors.neutral700, letterSpacing: 3),
               ),
             ),
           ),
@@ -75,25 +75,42 @@ class _DashboardScreenState extends State<DashboardScreen> {
             padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
             alignment: Alignment.centerLeft,
             child: Text(Strings.todayLedger,
-                style: KairosTheme.mono(size: 10, color: KairosColors.muted, letterSpacing: 4)),
+                style: KairosTheme.mono(size: 10, color: KairosColors.neutral400, letterSpacing: 4)),
           ),
           Expanded(
-            child: ListView.builder(
-              padding: EdgeInsets.zero,
-              itemCount: _tasks.length,
-              itemBuilder: (c, i) => TaskCard(task: _tasks[i], onToggle: (t) => _toggleTask(i, t)),
-            ),
+            child: taskProvider.isLoading && tasks.isEmpty
+                ? const Center(
+                    child: CircularProgressIndicator(
+                        color: KairosColors.neutral700, strokeWidth: 1))
+                : ListView.builder(
+                    padding: EdgeInsets.zero,
+                    itemCount: tasks.length,
+                    itemBuilder: (c, i) => TaskCard(
+                      task: tasks[i],
+                      onToggle: (t) {
+                        if (t.completed && !tasks[i].completed) {
+                          taskProvider.completeTask(int.parse(tasks[i].id));
+                        }
+                      },
+                    ),
+                  ),
           ),
           const Divider(),
           _PreviewBar(),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => debugPrint('Add task'),
-        backgroundColor: KairosColors.bronze,
-        foregroundColor: KairosColors.black,
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-        child: const Icon(Icons.add, size: 22),
+      floatingActionButton: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0.0, end: 1.0),
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.elasticOut,
+        builder: (_, scale, child) => Transform.scale(scale: scale, child: child),
+        child: FloatingActionButton(
+          onPressed: () => context.go(Routes.create),
+          backgroundColor: KairosColors.neutral700,
+          foregroundColor: KairosColors.neutral900,
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+          child: const Icon(Icons.add, size: 22),
+        ),
       ),
     );
   }
@@ -109,7 +126,7 @@ class _PreviewBar extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 16),
               child: Center(
                 child: Text(label,
-                    style: KairosTheme.mono(size: 10, color: KairosColors.bronze, letterSpacing: 3)),
+                    style: KairosTheme.mono(size: 10, color: KairosColors.neutral700, letterSpacing: 3)),
               ),
             ),
           ),
@@ -117,10 +134,14 @@ class _PreviewBar extends StatelessWidget {
     return Row(
       children: [
         link(Strings.tunnel, Routes.tunnel),
-        const VerticalDivider(width: 1, color: KairosColors.hairline),
+        const VerticalDivider(width: 1, color: KairosColors.neutral300),
         link(Strings.focus, Routes.focus),
-        const VerticalDivider(width: 1, color: KairosColors.hairline),
+        const VerticalDivider(width: 1, color: KairosColors.neutral300),
         link(Strings.minos, Routes.confessional),
+        const VerticalDivider(width: 1, color: KairosColors.neutral300),
+        link('STATS', Routes.stats),
+        const VerticalDivider(width: 1, color: KairosColors.neutral300),
+        link('ZONAS', Routes.geofence),
       ],
     );
   }

@@ -8,6 +8,9 @@ class Routes {
   static const focus = '/focus';
   static const confessional = '/confessional';
   static const settings = '/settings';
+  static const create = '/create';
+  static const stats = '/stats';
+  static const geofence = '/geofence';
 }
 
 class Timings {

@@ -52,9 +52,12 @@ class SettingsScreen extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 18),
                 decoration: BoxDecoration(
-                  border: Border.all(color: KairosColors.blood, width: 1),
+                  border: Border.all(color: KairosColors.error600, width: 1),
                   boxShadow: [
-                    BoxShadow(color: KairosColors.blood.withOpacity(0.28), blurRadius: 22, spreadRadius: 1),
+                    BoxShadow(
+                        color: KairosColors.error600.withValues(alpha: 0.28),
+                        blurRadius: 22,
+                        spreadRadius: 1),
                   ],
                 ),
                 child: Center(
@@ -62,7 +65,7 @@ class SettingsScreen extends StatelessWidget {
                     Strings.logout,
                     style: KairosTheme.mono(
                       size: 12,
-                      color: KairosColors.blood,
+                      color: KairosColors.error600,
                       letterSpacing: 5,
                       weight: FontWeight.w600,
                     ),
@@ -73,7 +76,10 @@ class SettingsScreen extends StatelessWidget {
             const SizedBox(height: 30),
             Center(
               child: Text(Strings.copyright,
-                  style: KairosTheme.mono(size: 9, color: KairosColors.muted, letterSpacing: 3)),
+                  style: KairosTheme.mono(
+                      size: 9,
+                      color: KairosColors.neutral400,
+                      letterSpacing: 3)),
             ),
             const SizedBox(height: 24),
           ],
@@ -92,7 +98,8 @@ class _Section extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Text(title.toUpperCase(),
-          style: KairosTheme.mono(size: 10, color: KairosColors.bronze, letterSpacing: 4)),
+          style:
+              KairosTheme.mono(size: 10, color: KairosColors.neutral700, letterSpacing: 4)),
     );
   }
 }
@@ -107,7 +114,8 @@ class _Row extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 14),
       decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: KairosColors.hairline, width: 1)),
+        border:
+            Border(bottom: BorderSide(color: KairosColors.neutral300, width: 1)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -115,13 +123,14 @@ class _Row extends StatelessWidget {
           Expanded(
             flex: 2,
             child: Text(label.toUpperCase(),
-                style: KairosTheme.mono(size: 10, color: KairosColors.muted, letterSpacing: 3)),
+                style: KairosTheme.mono(
+                    size: 10, color: KairosColors.neutral400, letterSpacing: 3)),
           ),
           Expanded(
             flex: 3,
             child: Text(value,
                 textAlign: TextAlign.right,
-                style: KairosTheme.serif(size: 16, color: KairosColors.bone)),
+                style: KairosTheme.serif(size: 16, color: KairosColors.neutral50)),
           ),
         ],
       ),

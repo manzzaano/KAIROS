@@ -14,11 +14,11 @@ class TaskCard extends StatelessWidget {
   Color _priorityColor() {
     switch (task.priority) {
       case 3:
-        return KairosColors.blood;
+        return KairosColors.error600;
       case 2:
-        return KairosColors.bronze;
+        return KairosColors.neutral700;
       default:
-        return KairosColors.muted;
+        return KairosColors.neutral400;
     }
   }
 
@@ -32,15 +32,15 @@ class TaskCard extends StatelessWidget {
 
     return InkWell(
       onTap: _toggle,
-      splashColor: KairosColors.bronze.withOpacity(0.12),
-      highlightColor: KairosColors.hairline.withOpacity(0.4),
-      hoverColor: KairosColors.ink,
+      splashColor: KairosColors.neutral700.withValues(alpha: 0.12),
+      highlightColor: KairosColors.neutral300.withValues(alpha: 0.4),
+      hoverColor: KairosColors.neutral900,
       child: Container(
         decoration: BoxDecoration(
-          color: KairosColors.charcoal,
+          color: KairosColors.neutral900,
           border: Border(
             left: BorderSide(color: color, width: 3),
-            bottom: const BorderSide(color: KairosColors.hairline, width: 1),
+            bottom: const BorderSide(color: KairosColors.neutral300, width: 1),
           ),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
@@ -52,10 +52,11 @@ class TaskCard extends StatelessWidget {
               child: Checkbox(
                 value: done,
                 onChanged: (_) => _toggle(),
-                activeColor: KairosColors.bronze,
-                checkColor: KairosColors.black,
-                side: const BorderSide(color: KairosColors.muted, width: 1),
-                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                activeColor: KairosColors.neutral700,
+                checkColor: KairosColors.neutral900,
+                side: const BorderSide(color: KairosColors.neutral400, width: 1),
+                shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.zero),
               ),
             ),
             const SizedBox(width: 16),
@@ -64,15 +65,21 @@ class TaskCard extends StatelessWidget {
                 task.title,
                 style: KairosTheme.serif(
                   size: 20,
-                  color: done ? KairosColors.muted : KairosColors.bone,
+                  color: done ? KairosColors.neutral400 : KairosColors.neutral50,
                   style: done ? FontStyle.italic : FontStyle.normal,
                 ),
               ),
             ),
             const SizedBox(width: 12),
-            Text('P${task.priority}', style: KairosTheme.mono(size: 10, color: color, letterSpacing: 1)),
+            Text('P${task.priority}',
+                style:
+                    KairosTheme.mono(size: 10, color: color, letterSpacing: 1)),
             const SizedBox(width: 12),
-            Text(energy, style: KairosTheme.mono(size: 11, color: KairosColors.bronze, letterSpacing: 1)),
+            Text(energy,
+                style: KairosTheme.mono(
+                    size: 11,
+                    color: KairosColors.neutral700,
+                    letterSpacing: 1)),
           ],
         ),
       ),

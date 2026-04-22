@@ -1,10 +1,17 @@
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'dart:async';
 
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+
+import '../providers/task_provider.dart';
+import '../services/api_client.dart';
 import '../utils/constants.dart';
 import '../utils/strings.dart';
 import '../utils/theme.dart';
-import '../widgets/message_bubble.dart';
+import '../widgets/debt_severity_card.dart';
+import '../widgets/reflection_display.dart';
 
 class ConfessionalScreen extends StatefulWidget {
   const ConfessionalScreen({super.key});
@@ -14,39 +21,108 @@ class ConfessionalScreen extends StatefulWidget {
 }
 
 class _ConfessionalScreenState extends State<ConfessionalScreen> {
-  final _input = TextEditingController();
-  final _scroll = ScrollController();
-  final List<_Msg> _messages = [
-    _Msg(Speaker.minos, 'Aprendiz. Declara el contrato que has roto.', '10:44'),
-    _Msg(Speaker.aspirant, 'Abandoné el bloque de trabajo profundo. Cansancio.', '10:45'),
-    _Msg(Speaker.minos,
-        'El cansancio es sensación. La disciplina es elección. Te debes cuarenta y dos minutos. ¿Pagarás la deuda ahora o la diferirás?',
-        '10:46'),
-    _Msg(Speaker.aspirant, 'Diferir. Necesito descansar.', '10:46'),
-  ];
-  bool _typing = true;
+  final ApiClient _apiClient = ApiClient();
+  StreamSubscription<String>? _streamSub;
+
+  String _reflection = '';
+  bool _isLoadingSeverity = false;
+  bool _isStreaming = false;
+  Map<String, dynamic>? _debtSeverity;
+  String? _severityError;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchSeverity();
+  }
 
   @override
   void dispose() {
-    _input.dispose();
-    _scroll.dispose();
+    _streamSub?.cancel();
     super.dispose();
   }
 
-  void _send() {
-    final text = _input.text.trim();
-    if (text.isEmpty) return;
+  Future<void> _fetchSeverity() async {
     setState(() {
-      _messages.add(_Msg(Speaker.aspirant, text, '10:47'));
-      _input.clear();
-      _typing = true;
+      _isLoadingSeverity = true;
+      _severityError = null;
     });
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scroll.hasClients) {
-        _scroll.animateTo(_scroll.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
-      }
+    try {
+      final severity = await _apiClient.getDebtSeverity();
+      if (!mounted) return;
+      setState(() => _debtSeverity = severity);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() =>
+          _severityError = e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      if (mounted) setState(() => _isLoadingSeverity = false);
+    }
+  }
+
+  void _startReflection() {
+    _streamSub?.cancel();
+    setState(() {
+      _reflection = '';
+      _isStreaming = true;
     });
+
+    _streamSub = _apiClient.getReflectionStream().listen(
+      (chunk) {
+        if (!mounted) return;
+        setState(() => _reflection += chunk);
+      },
+      onError: (Object e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                e.toString().replaceFirst('Exception: ', '')),
+          ),
+        );
+        setState(() => _isStreaming = false);
+      },
+      onDone: () {
+        if (!mounted) return;
+        setState(() => _isStreaming = false);
+      },
+    );
+  }
+
+  void _showPayDebtSheet() {
+    final debtMinutes =
+        _debtSeverity?['total_debt_minutes'] as int? ?? 0;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: KairosColors.neutral900,
+      shape: const RoundedRectangleBorder(
+        side: BorderSide(color: KairosColors.neutral700, width: 0.5),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (_) => _PayDebtSheet(
+        debtMinutes: debtMinutes,
+        onConfirm: (minutes) async {
+          Navigator.pop(context);
+          final provider = context.read<TaskProvider>();
+          await provider.payDebt(minutes);
+          if (!mounted) return;
+          if (provider.error != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(provider.error!)),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                    '$minutes min pagados · Deuda restante: ${provider.debtTotalMinutes} min'),
+              ),
+            );
+            _fetchSeverity();
+          }
+        },
+      ),
+    );
   }
 
   @override
@@ -59,9 +135,15 @@ class _ConfessionalScreenState extends State<ConfessionalScreen> {
         ),
         title: Row(
           children: [
-            Text('Ψ', style: KairosTheme.serif(size: 18, color: KairosColors.bronze)),
+            Text('Ψ',
+                style: KairosTheme.serif(
+                    size: 18, color: KairosColors.neutral700)),
             const SizedBox(width: 12),
-            Text(Strings.minos, style: KairosTheme.mono(size: 13, color: KairosColors.bone, letterSpacing: 4)),
+            Text(Strings.minos,
+                style: KairosTheme.mono(
+                    size: 13,
+                    color: KairosColors.neutral50,
+                    letterSpacing: 4)),
           ],
         ),
       ),
@@ -70,38 +152,69 @@ class _ConfessionalScreenState extends State<ConfessionalScreen> {
           gradient: RadialGradient(
             radius: 1.2,
             center: Alignment.topCenter,
-            colors: [Color(0x336B1A1A), KairosColors.black],
+            colors: [Color(0x336B1A1A), KairosColors.neutral900],
           ),
         ),
         child: Column(
           children: [
             _CaseStrip(),
             Expanded(
-              child: ListView.builder(
-                controller: _scroll,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                itemCount: _messages.length + (_typing ? 1 : 0),
-                itemBuilder: (_, i) {
-                  if (_typing && i == _messages.length) return const TypingIndicator();
-                  final m = _messages[i];
-                  return MessageBubble(text: m.text, timestamp: m.time, speaker: m.speaker);
-                },
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildSeveritySection(),
+                    const SizedBox(height: 20),
+                    ReflectionDisplay(
+                      text: _reflection,
+                      isStreaming: _isStreaming,
+                    ),
+                    const SizedBox(height: 32),
+                  ],
+                ),
               ),
             ),
-            _InputBar(controller: _input, onSend: _send),
+            _ActionBar(
+              hasReflection: _reflection.isNotEmpty,
+              isStreaming: _isStreaming,
+              onGenerate: _startReflection,
+              onPayDebt: _showPayDebtSheet,
+            ),
           ],
         ),
       ),
     );
   }
+
+  Widget _buildSeveritySection() {
+    if (_isLoadingSeverity) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 24),
+          child: CircularProgressIndicator(
+              color: KairosColors.error600, strokeWidth: 1),
+        ),
+      );
+    }
+    if (_debtSeverity != null) {
+      return DebtSeverityCard(severity: _debtSeverity!);
+    }
+    if (_severityError != null) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Text(
+          _severityError!,
+          style: KairosTheme.mono(
+              size: 9, color: KairosColors.error600, letterSpacing: 1),
+        ),
+      );
+    }
+    return const SizedBox.shrink();
+  }
 }
 
-class _Msg {
-  final Speaker speaker;
-  final String text;
-  final String time;
-  _Msg(this.speaker, this.text, this.time);
-}
+// ─── Private widgets ──────────────────────────────────────────────────────────
 
 class _CaseStrip extends StatelessWidget {
   @override
@@ -110,51 +223,226 @@ class _CaseStrip extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: const BoxDecoration(
-        color: KairosColors.charcoal,
-        border: Border(bottom: BorderSide(color: KairosColors.hairline, width: 1)),
+        color: KairosColors.neutral900,
+        border: Border(
+            bottom: BorderSide(color: KairosColors.neutral300, width: 1)),
       ),
       child: Text(
         Strings.confessionalCase,
-        style: KairosTheme.mono(size: 9, color: KairosColors.bronze, letterSpacing: 3),
+        style: KairosTheme.mono(
+            size: 9, color: KairosColors.neutral700, letterSpacing: 3),
       ),
     );
   }
 }
 
-class _InputBar extends StatelessWidget {
-  final TextEditingController controller;
-  final VoidCallback onSend;
-  const _InputBar({required this.controller, required this.onSend});
+class _ActionBar extends StatelessWidget {
+  final bool hasReflection;
+  final bool isStreaming;
+  final VoidCallback onGenerate;
+  final VoidCallback onPayDebt;
+
+  const _ActionBar({
+    required this.hasReflection,
+    required this.isStreaming,
+    required this.onGenerate,
+    required this.onPayDebt,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 10, 8, 14),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
       decoration: const BoxDecoration(
-        color: KairosColors.ink,
-        border: Border(top: BorderSide(color: KairosColors.hairline, width: 1)),
+        border:
+            Border(top: BorderSide(color: KairosColors.neutral700, width: 0.5)),
       ),
-      child: Row(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Expanded(
-            child: TextField(
-              controller: controller,
-              cursorColor: KairosColors.bronzeLight,
-              cursorWidth: 1,
-              style: KairosTheme.serif(size: 18, color: KairosColors.bone, style: FontStyle.italic),
-              decoration: InputDecoration(
-                isDense: true,
-                border: InputBorder.none,
-                hintText: Strings.confessPlaceholder,
-                hintStyle: KairosTheme.serif(
-                    size: 18, color: KairosColors.muted, style: FontStyle.italic, weight: FontWeight.w300),
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: FilledButton(
+              onPressed: isStreaming ? null : onGenerate,
+              style: FilledButton.styleFrom(
+                backgroundColor: KairosColors.neutral50,
+                foregroundColor: KairosColors.neutral900,
+                shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.zero),
               ),
-              onSubmitted: (_) => onSend(),
+              child: isStreaming
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 1.5,
+                          color: KairosColors.neutral900),
+                    )
+                  : Text(
+                      hasReflection
+                          ? 'REGENERAR REFLEXIÓN'
+                          : 'GENERAR REFLEXIÓN',
+                      style: KairosTheme.mono(
+                          size: 11,
+                          weight: FontWeight.w700,
+                          color: KairosColors.neutral900,
+                          letterSpacing: 2),
+                    ),
             ),
           ),
-          IconButton(
-            onPressed: onSend,
-            icon: const Icon(Icons.arrow_forward, color: KairosColors.bronze, size: 20),
+          if (hasReflection && !isStreaming) ...[
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: FilledButton(
+                onPressed: onPayDebt,
+                style: FilledButton.styleFrom(
+                  backgroundColor: KairosColors.error600,
+                  foregroundColor: KairosColors.neutral50,
+                  shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.zero),
+                ),
+                child: Text(
+                  'PAGAR DEUDA',
+                  style: KairosTheme.mono(
+                      size: 11,
+                      weight: FontWeight.w700,
+                      color: KairosColors.neutral50,
+                      letterSpacing: 2),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _PayDebtSheet extends StatefulWidget {
+  final int debtMinutes;
+  final Future<void> Function(int minutes) onConfirm;
+
+  const _PayDebtSheet({
+    required this.debtMinutes,
+    required this.onConfirm,
+  });
+
+  @override
+  State<_PayDebtSheet> createState() => _PayDebtSheetState();
+}
+
+class _PayDebtSheetState extends State<_PayDebtSheet> {
+  late final TextEditingController _ctrl;
+  bool _loading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = TextEditingController(
+        text: widget.debtMinutes > 0 ? widget.debtMinutes.toString() : '');
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(
+        left: 24,
+        right: 24,
+        top: 28,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 28,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'PAGAR DEUDA',
+            style:
+                KairosTheme.mono(size: 11, letterSpacing: 2),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Deuda total: ${widget.debtMinutes} min',
+            style: KairosTheme.serif(
+                size: 14, color: KairosColors.neutral400),
+          ),
+          const SizedBox(height: 20),
+          TextField(
+            controller: _ctrl,
+            autofocus: true,
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            style: KairosTheme.serif(size: 28),
+            decoration: InputDecoration(
+              hintText: 'Minutos',
+              suffixText: 'MIN',
+              hintStyle: KairosTheme.serif(
+                  size: 28, color: KairosColors.neutral700),
+              suffixStyle: KairosTheme.mono(
+                  size: 9, color: KairosColors.neutral400),
+              border: const UnderlineInputBorder(
+                borderSide: BorderSide(
+                    color: KairosColors.neutral700, width: 0.5),
+              ),
+              enabledBorder: const UnderlineInputBorder(
+                borderSide: BorderSide(
+                    color: KairosColors.neutral700, width: 0.5),
+              ),
+              focusedBorder: const UnderlineInputBorder(
+                borderSide: BorderSide(
+                    color: KairosColors.neutral400, width: 1),
+              ),
+              contentPadding: const EdgeInsets.symmetric(vertical: 8),
+            ),
+          ),
+          const SizedBox(height: 28),
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: FilledButton(
+              onPressed: _loading
+                  ? null
+                  : () async {
+                      final minutes = int.tryParse(_ctrl.text) ?? 0;
+                      if (minutes <= 0) return;
+                      setState(() => _loading = true);
+                      try {
+                        await widget.onConfirm(minutes);
+                      } finally {
+                        if (mounted) setState(() => _loading = false);
+                      }
+                    },
+              style: FilledButton.styleFrom(
+                backgroundColor: KairosColors.error600,
+                foregroundColor: KairosColors.neutral50,
+                shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.zero),
+              ),
+              child: _loading
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 1.5,
+                          color: KairosColors.neutral50),
+                    )
+                  : Text(
+                      'CONFIRMAR',
+                      style: KairosTheme.mono(
+                          size: 12,
+                          weight: FontWeight.w700,
+                          letterSpacing: 2),
+                    ),
+            ),
           ),
         ],
       ),

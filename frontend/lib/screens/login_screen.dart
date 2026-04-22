@@ -63,9 +63,9 @@ class _LoginScreenState extends State<LoginScreen> {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            backgroundColor: KairosColors.blood,
+            backgroundColor: KairosColors.error600,
             content: Text(auth.error!,
-                style: KairosTheme.mono(size: 11, color: KairosColors.bone)),
+                style: KairosTheme.mono(size: 11, color: KairosColors.neutral50)),
           ),
         );
       });
@@ -105,8 +105,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         Text(Strings.appName,
                             style: KairosTheme.mono(
                                 size: 11,
-                                color: KairosColors.bronze,
-                                letterSpacing: 6)),
+                                color: KairosColors.neutral400,
+                                letterSpacing: 2)),
                         const SizedBox(height: 36),
                         Text(
                           Strings.loginQuote,
@@ -114,14 +114,14 @@ class _LoginScreenState extends State<LoginScreen> {
                               size: 32,
                               weight: FontWeight.w300,
                               height: 1.15,
-                              color: KairosColors.bone),
+                              color: KairosColors.neutral50),
                         ),
                         const SizedBox(height: 8),
                         Text(Strings.loginAuthor,
                             style: KairosTheme.mono(
                                 size: 9,
-                                color: KairosColors.muted,
-                                letterSpacing: 3)),
+                                color: KairosColors.neutral400,
+                                letterSpacing: 1)),
                         const SizedBox(height: 48),
                         StoicInput(
                             label: Strings.email,
@@ -145,8 +145,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                     : Strings.signIn,
                                 style: KairosTheme.mono(
                                   size: 12,
-                                  color: KairosColors.black,
-                                  letterSpacing: 4,
+                                  color: KairosColors.neutral900,
+                                  letterSpacing: 2,
                                   weight: FontWeight.w600,
                                 ),
                               ),
@@ -171,8 +171,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               Strings.noAccount,
                               style: KairosTheme.mono(
                                   size: 10,
-                                  color: KairosColors.bronze,
-                                  letterSpacing: 3),
+                                  color: KairosColors.neutral400,
+                                  letterSpacing: 2),
                             ),
                           ),
                         ),
@@ -181,8 +181,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           child: Text(Strings.copyright,
                               style: KairosTheme.mono(
                                   size: 9,
-                                  color: KairosColors.muted,
-                                  letterSpacing: 3)),
+                                  color: KairosColors.neutral400,
+                                  letterSpacing: 1)),
                         ),
                         const SizedBox(height: 8),
                       ],
@@ -212,15 +212,16 @@ class _OAuthButton extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 14),
           decoration: BoxDecoration(
-            border: Border.all(color: KairosColors.hairline, width: 1),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: KairosColors.neutral700, width: 1),
           ),
           child: Center(
             child: Text(
               label,
               style: KairosTheme.mono(
                 size: 10,
-                color: onTap == null ? KairosColors.muted : KairosColors.bone,
-                letterSpacing: 4,
+                color: onTap == null ? KairosColors.neutral400 : KairosColors.neutral50,
+                letterSpacing: 2,
                 weight: FontWeight.w500,
               ),
             ),

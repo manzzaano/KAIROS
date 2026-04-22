@@ -73,8 +73,8 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            backgroundColor: KairosColors.blood,
-            content: Text(auth.error!, style: KairosTheme.mono(size: 11, color: KairosColors.bone)),
+            backgroundColor: KairosColors.error600,
+            content: Text(auth.error!, style: KairosTheme.mono(size: 11, color: KairosColors.neutral50)),
           ),
         );
       });
@@ -111,21 +111,21 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(Strings.appName,
-                            style: KairosTheme.mono(size: 11, color: KairosColors.bronze, letterSpacing: 6)),
+                            style: KairosTheme.mono(size: 11, color: KairosColors.neutral400, letterSpacing: 2)),
                         GestureDetector(
                           onTap: () => context.go(Routes.login),
                           child: Text(Strings.back,
-                              style: KairosTheme.mono(size: 10, color: KairosColors.muted, letterSpacing: 3)),
+                              style: KairosTheme.mono(size: 10, color: KairosColors.neutral400, letterSpacing: 1)),
                         ),
                       ],
                     ),
                     const SizedBox(height: 36),
                     Text(Strings.registerQuote,
                         style: KairosTheme.serif(
-                            size: 32, weight: FontWeight.w300, height: 1.15, color: KairosColors.bone)),
+                            size: 32, weight: FontWeight.w300, height: 1.15, color: KairosColors.neutral50)),
                     const SizedBox(height: 8),
                     Text(Strings.registerAuthor,
-                        style: KairosTheme.mono(size: 9, color: KairosColors.muted, letterSpacing: 3)),
+                        style: KairosTheme.mono(size: 9, color: KairosColors.neutral400, letterSpacing: 1)),
                     const SizedBox(height: 40),
                     StoicInput(
                         label: Strings.email,
@@ -140,7 +140,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                     if (_localError != null) ...[
                       const SizedBox(height: 20),
                       Text(_localError!,
-                          style: KairosTheme.mono(size: 10, color: KairosColors.blood, letterSpacing: 2)),
+                          style: KairosTheme.mono(size: 10, color: KairosColors.error600, letterSpacing: 1)),
                     ],
                     const SizedBox(height: 40),
                     SizedBox(
@@ -153,8 +153,8 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                             auth.isLoading ? Strings.signInAwaiting : Strings.register,
                             style: KairosTheme.mono(
                               size: 12,
-                              color: KairosColors.black,
-                              letterSpacing: 4,
+                              color: KairosColors.neutral900,
+                              letterSpacing: 2,
                               weight: FontWeight.w600,
                             ),
                           ),
@@ -166,7 +166,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                       child: GestureDetector(
                         onTap: () => context.go(Routes.login),
                         child: Text(Strings.alreadyHaveAccount,
-                            style: KairosTheme.mono(size: 10, color: KairosColors.bronze, letterSpacing: 3)),
+                            style: KairosTheme.mono(size: 10, color: KairosColors.neutral400, letterSpacing: 2)),
                       ),
                     ),
                     const SizedBox(height: 24),

@@ -39,31 +39,46 @@ class TimeBlock extends StatelessWidget {
     final content = Container(
       padding: const EdgeInsets.fromLTRB(24, 20, 20, 20),
       decoration: BoxDecoration(
-        color: isNow ? KairosColors.ink : Colors.transparent,
+        color: isNow ? KairosColors.neutral900 : Colors.transparent,
         border: Border(
           left: BorderSide(
-            color: isNow ? KairosColors.bronze : KairosColors.hairline,
+            color: isNow ? KairosColors.neutral700 : KairosColors.neutral300,
             width: isNow ? 2 : 1,
           ),
         ),
         boxShadow: isNow
-            ? [const BoxShadow(color: Color(0x409A7C4E), blurRadius: 24, spreadRadius: 2)]
+            ? [
+                BoxShadow(
+                    color: KairosColors.neutral700.withValues(alpha: 0.25),
+                    blurRadius: 24,
+                    spreadRadius: 2)
+              ]
             : null,
       ),
       child: Row(
         children: [
           SizedBox(
             width: 72,
-            child: Text(time, style: KairosTheme.mono(size: 16, color: KairosColors.bone, letterSpacing: 1)),
+            child: Text(time,
+                style: KairosTheme.mono(
+                    size: 16,
+                    color: KairosColors.neutral50,
+                    letterSpacing: 1)),
           ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: KairosTheme.serif(size: 22, color: KairosColors.bone)),
+                Text(title,
+                    style:
+                        KairosTheme.serif(size: 22, color: KairosColors.neutral50)),
                 const SizedBox(height: 4),
-                Text(meta, style: KairosTheme.mono(size: 10, color: KairosColors.bronze, letterSpacing: 2)),
+                Text(meta,
+                    style: KairosTheme.mono(
+                        size: 10,
+                        color: KairosColors.neutral700,
+                        letterSpacing: 2)),
               ],
             ),
           ),

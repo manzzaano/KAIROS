@@ -62,32 +62,49 @@ class _FocusScreenState extends State<FocusScreen> {
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  CustomPaint(size: const Size(280, 280), painter: _RingPainter(progress)),
+                  CustomPaint(
+                      size: const Size(280, 280),
+                      painter: _RingPainter(progress)),
                   Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(Strings.deepWork,
-                          style: KairosTheme.mono(size: 10, color: KairosColors.bronze, letterSpacing: 5)),
+                          style: KairosTheme.mono(
+                              size: 10,
+                              color: KairosColors.neutral700,
+                              letterSpacing: 5)),
                       const SizedBox(height: 14),
                       RichText(
                         text: TextSpan(children: [
                           TextSpan(
                             text: _fmt(m),
-                            style: KairosTheme.serif(size: 72, weight: FontWeight.w300, color: KairosColors.bone),
+                            style: KairosTheme.serif(
+                                size: 72,
+                                weight: FontWeight.w300,
+                                color: KairosColors.neutral50),
                           ),
                           TextSpan(
                             text: _colon ? ':' : ' ',
-                            style: KairosTheme.serif(size: 72, weight: FontWeight.w300, color: KairosColors.bronze),
+                            style: KairosTheme.serif(
+                                size: 72,
+                                weight: FontWeight.w300,
+                                color: KairosColors.neutral700),
                           ),
                           TextSpan(
                             text: _fmt(s),
-                            style: KairosTheme.serif(size: 72, weight: FontWeight.w300, color: KairosColors.bone),
+                            style: KairosTheme.serif(
+                                size: 72,
+                                weight: FontWeight.w300,
+                                color: KairosColors.neutral50),
                           ),
                         ]),
                       ),
                       const SizedBox(height: 8),
                       Text(Strings.remaining,
-                          style: KairosTheme.mono(size: 9, color: KairosColors.muted, letterSpacing: 4)),
+                          style: KairosTheme.mono(
+                              size: 9,
+                              color: KairosColors.neutral400,
+                              letterSpacing: 4)),
                     ],
                   ),
                 ],
@@ -96,13 +113,17 @@ class _FocusScreenState extends State<FocusScreen> {
             const SizedBox(height: 36),
             Text(Strings.focusMotto,
                 style: KairosTheme.serif(
-                    size: 20, color: KairosColors.bone, style: FontStyle.italic, weight: FontWeight.w300)),
+                    size: 20,
+                    color: KairosColors.neutral50,
+                    style: FontStyle.italic,
+                    weight: FontWeight.w300)),
             const Spacer(flex: 3),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32),
               child: Text(Strings.focusWarning,
                   textAlign: TextAlign.center,
-                  style: KairosTheme.mono(size: 9, color: KairosColors.blood, letterSpacing: 3)),
+                  style: KairosTheme.mono(
+                      size: 9, color: KairosColors.error600, letterSpacing: 3)),
             ),
             const SizedBox(height: 14),
             _SurrenderButton(onTap: () => context.go(Routes.confessional)),
@@ -128,12 +149,21 @@ class _SurrenderButton extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.symmetric(vertical: 20),
           decoration: BoxDecoration(
-            border: Border.all(color: KairosColors.blood, width: 1),
-            boxShadow: [BoxShadow(color: KairosColors.blood.withOpacity(0.35), blurRadius: 24, spreadRadius: 1)],
+            border: Border.all(color: KairosColors.error600, width: 1),
+            boxShadow: [
+              BoxShadow(
+                  color: KairosColors.error600.withValues(alpha: 0.35),
+                  blurRadius: 24,
+                  spreadRadius: 1)
+            ],
           ),
           child: Center(
             child: Text(Strings.surrender,
-                style: KairosTheme.mono(size: 12, color: KairosColors.blood, letterSpacing: 6, weight: FontWeight.w600)),
+                style: KairosTheme.mono(
+                    size: 12,
+                    color: KairosColors.error600,
+                    letterSpacing: 6,
+                    weight: FontWeight.w600)),
           ),
         ),
       ),
@@ -150,44 +180,43 @@ class _RingPainter extends CustomPainter {
     final center = size.center(Offset.zero);
     final radius = size.shortestSide / 2 - 10;
 
-    // Tick marks (60 total, 12 major)
     for (int i = 0; i < 60; i++) {
       final angle = (i / 60) * 2 * math.pi - math.pi / 2;
       final isMajor = i % 5 == 0;
       final inner = radius - (isMajor ? 10 : 5);
-      final p1 = Offset(center.dx + math.cos(angle) * radius, center.dy + math.sin(angle) * radius);
-      final p2 = Offset(center.dx + math.cos(angle) * inner, center.dy + math.sin(angle) * inner);
+      final p1 = Offset(center.dx + math.cos(angle) * radius,
+          center.dy + math.sin(angle) * radius);
+      final p2 = Offset(center.dx + math.cos(angle) * inner,
+          center.dy + math.sin(angle) * inner);
       canvas.drawLine(
         p1,
         p2,
         Paint()
-          ..color = isMajor ? KairosColors.bronze : KairosColors.muted
+          ..color =
+              isMajor ? KairosColors.neutral700 : KairosColors.neutral400
           ..strokeWidth = isMajor ? 1.2 : 0.6,
       );
     }
 
-    // Base ring
     canvas.drawCircle(
       center,
       radius - 20,
       Paint()
-        ..color = KairosColors.hairline
+        ..color = KairosColors.neutral300
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1,
     );
 
-    // Progress arc
-    final arcPaint = Paint()
-      ..color = KairosColors.bronze
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2
-      ..strokeCap = StrokeCap.butt;
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius - 20),
       -math.pi / 2,
       progress * 2 * math.pi,
       false,
-      arcPaint,
+      Paint()
+        ..color = KairosColors.neutral700
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2
+        ..strokeCap = StrokeCap.butt,
     );
   }
 

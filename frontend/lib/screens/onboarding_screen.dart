@@ -41,7 +41,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final username = context.watch<AuthProvider>().user?.username ?? Strings.aspirant;
+    final username =
+        context.watch<AuthProvider>().user?.username ?? Strings.aspirant;
 
     return Scaffold(
       body: SafeArea(
@@ -53,11 +54,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(Strings.appName,
-                      style: KairosTheme.mono(size: 11, color: KairosColors.bronze, letterSpacing: 6)),
+                      style: KairosTheme.mono(
+                          size: 11,
+                          color: KairosColors.neutral700,
+                          letterSpacing: 6)),
                   GestureDetector(
                     onTap: _finish,
                     child: Text(Strings.skip,
-                        style: KairosTheme.mono(size: 10, color: KairosColors.muted, letterSpacing: 4)),
+                        style: KairosTheme.mono(
+                            size: 10,
+                            color: KairosColors.neutral400,
+                            letterSpacing: 4)),
                   ),
                 ],
               ),
@@ -67,7 +74,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 controller: _pc,
                 itemCount: onboardingSteps.length,
                 onPageChanged: (i) => setState(() => _index = i),
-                itemBuilder: (_, i) => _Step(step: onboardingSteps[i], username: username),
+                itemBuilder: (_, i) =>
+                    _Step(step: onboardingSteps[i], username: username),
               ),
             ),
             _Dots(count: onboardingSteps.length, index: _index),
@@ -81,10 +89,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: Text(
-                      _index >= onboardingSteps.length - 1 ? Strings.start : Strings.nextStep,
+                      _index >= onboardingSteps.length - 1
+                          ? Strings.start
+                          : Strings.nextStep,
                       style: KairosTheme.mono(
                         size: 12,
-                        color: KairosColors.black,
+                        color: KairosColors.neutral900,
                         letterSpacing: 4,
                         weight: FontWeight.w600,
                       ),
@@ -119,21 +129,38 @@ class _Step extends StatelessWidget {
             width: 72,
             height: 72,
             decoration: BoxDecoration(
-              border: Border.all(color: KairosColors.bronze, width: 1),
-              boxShadow: [BoxShadow(color: KairosColors.bronze.withOpacity(0.18), blurRadius: 40, spreadRadius: 2)],
+              border: Border.all(color: KairosColors.neutral700, width: 1),
+              boxShadow: [
+                BoxShadow(
+                    color: KairosColors.neutral700.withValues(alpha: 0.18),
+                    blurRadius: 40,
+                    spreadRadius: 2)
+              ],
             ),
-            child: Icon(step.icon, color: KairosColors.bronze, size: 34),
+            child:
+                Icon(step.icon, color: KairosColors.neutral700, size: 34),
           ),
           const SizedBox(height: 44),
-          Text(Strings.stepOf.replaceAll('{n}', step.step.toString().padLeft(2, '0')),
-              style: KairosTheme.mono(size: 10, color: KairosColors.muted, letterSpacing: 4)),
+          Text(
+              Strings.stepOf.replaceAll(
+                  '{n}', step.step.toString().padLeft(2, '0')),
+              style: KairosTheme.mono(
+                  size: 10, color: KairosColors.neutral400, letterSpacing: 4)),
           const SizedBox(height: 14),
           Text(step.title,
-              style: KairosTheme.serif(size: 38, weight: FontWeight.w300, color: KairosColors.bone, height: 1.1)),
+              style: KairosTheme.serif(
+                  size: 38,
+                  weight: FontWeight.w300,
+                  color: KairosColors.neutral50,
+                  height: 1.1)),
           const SizedBox(height: 18),
           Text(desc,
               style: KairosTheme.serif(
-                  size: 20, weight: FontWeight.w300, color: KairosColors.bone, style: FontStyle.italic, height: 1.4)),
+                  size: 20,
+                  weight: FontWeight.w300,
+                  color: KairosColors.neutral50,
+                  style: FontStyle.italic,
+                  height: 1.4)),
         ],
       ),
     );
@@ -156,7 +183,7 @@ class _Dots extends StatelessWidget {
           margin: const EdgeInsets.symmetric(horizontal: 4),
           width: active ? 22 : 6,
           height: 2,
-          color: active ? KairosColors.bronze : KairosColors.hairline,
+          color: active ? KairosColors.neutral700 : KairosColors.neutral300,
         );
       }),
     );
