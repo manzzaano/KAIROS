@@ -33,7 +33,7 @@ class AuthProvider extends ChangeNotifier {
     if (supaUser != null) _user = User.fromSupabase(supaUser);
     _auth.authStateChanges.listen((state) {
       _user = state.session?.user != null
-          ? User.fromSupabase(state.session!.user!)
+          ? User.fromSupabase(state.session!.user)
           : null;
       notifyListeners();
     });

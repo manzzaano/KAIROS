@@ -5,7 +5,7 @@ import 'package:kairos/widgets/debt_severity_card.dart';
 void main() {
   group('DebtSeverityCard', () {
     testWidgets('renderiza con datos críticos', (tester) async {
-      await tester.pumpWidget(MaterialApp(
+      await tester.pumpWidget(const MaterialApp(
         home: Scaffold(
           body: DebtSeverityCard(severity: {
             'level': 'critical',
@@ -21,7 +21,7 @@ void main() {
     });
 
     testWidgets('renderiza con datos healthy', (tester) async {
-      await tester.pumpWidget(MaterialApp(
+      await tester.pumpWidget(const MaterialApp(
         home: Scaffold(
           body: DebtSeverityCard(severity: {
             'level': 'healthy',
@@ -37,7 +37,7 @@ void main() {
     });
 
     testWidgets('muestra minutos de deuda formateados', (tester) async {
-      await tester.pumpWidget(MaterialApp(
+      await tester.pumpWidget(const MaterialApp(
         home: Scaffold(
           body: DebtSeverityCard(severity: {
             'level': 'warning',

@@ -79,7 +79,7 @@ class TaskService {
     final streakResult =
         await client.rpc('calculate_streak', params: {'p_user_id': _uid});
 
-    final debt = (debtData as Map<String, dynamic>?) ??
+    final debt = debtData ??
         {'total_debt_minutes': 0, 'free_time_minutes': 0};
 
     return {

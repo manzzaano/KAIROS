@@ -5,7 +5,7 @@ import 'package:kairos/widgets/reflection_display.dart';
 void main() {
   group('ReflectionDisplay', () {
     testWidgets('muestra texto cuando tiene contenido', (tester) async {
-      await tester.pumpWidget(MaterialApp(
+      await tester.pumpWidget(const MaterialApp(
         home: Scaffold(
           body: ReflectionDisplay(
             text: 'Epicteto diría que el control es tuyo.',
@@ -21,9 +21,9 @@ void main() {
 
     testWidgets('muestra placeholder cuando texto vacío y no streaming',
         (tester) async {
-      await tester.pumpWidget(MaterialApp(
+      await tester.pumpWidget(const MaterialApp(
         home: Scaffold(
-          body: const ReflectionDisplay(
+          body: ReflectionDisplay(
             text: '',
             isStreaming: false,
           ),
@@ -35,9 +35,9 @@ void main() {
     });
 
     testWidgets('no lanza excepciones durante streaming', (tester) async {
-      await tester.pumpWidget(MaterialApp(
+      await tester.pumpWidget(const MaterialApp(
         home: Scaffold(
-          body: const ReflectionDisplay(
+          body: ReflectionDisplay(
             text: 'Texto parcial...',
             isStreaming: true,
           ),

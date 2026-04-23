@@ -36,7 +36,7 @@ class StoicInput extends StatelessWidget {
           decoration: InputDecoration(
             isDense: true,
             filled: true,
-            fillColor: KairosColors.neutral700.withOpacity(0.25),
+            fillColor: KairosColors.neutral700.withValues(alpha: 0.25),
             contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
             hintStyle: KairosTheme.serif(size: 16, color: KairosColors.neutral400),
             border: OutlineInputBorder(

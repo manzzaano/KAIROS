@@ -28,7 +28,7 @@ class DoricColumn extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: KairosColors.neutral700, width: 1),
         boxShadow: glow
-            ? [BoxShadow(color: color.withOpacity(0.05), blurRadius: 40, spreadRadius: 2)]
+            ? [BoxShadow(color: color.withValues(alpha: 0.05), blurRadius: 40, spreadRadius: 2)]
             : null,
       ),
     );

@@ -17,7 +17,7 @@ class FocusScreen extends StatefulWidget {
 
 class _FocusScreenState extends State<FocusScreen> {
   static const int _total = 90 * 60;
-  int _remaining = 73 * 60 + 42;
+  final int _remaining = 73 * 60 + 42;
   bool _colon = true;
   Timer? _blinker;
 

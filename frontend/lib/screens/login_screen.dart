@@ -49,13 +49,6 @@ class _LoginScreenState extends State<LoginScreen> {
     if (auth.isAuthenticated) _goNext(auth);
   }
 
-  Future<void> _apple() async {
-    final auth = context.read<AuthProvider>();
-    await auth.loginWithApple();
-    if (!mounted) return;
-    if (auth.isAuthenticated) _goNext(auth);
-  }
-
   void _maybeShowError(AuthProvider auth) {
     if (auth.error != null && auth.error != _shownError) {
       _shownError = auth.error;
@@ -159,7 +152,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           onTap: auth.isLoading ? null : _google,
                         ),
                         const SizedBox(height: 10),
-                        _OAuthButton(
+                        const _OAuthButton(
                           label: Strings.signInApple,
                           onTap: null,
                         ),
