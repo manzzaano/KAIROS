@@ -30,3 +30,7 @@ frontend/ios/Podfile.lock
 
 # NUNCA subir variables de entorno del frontend:
 frontend/.env
+
+# HERRAMIENTAS LOCALES
+.claude/
+*.db
