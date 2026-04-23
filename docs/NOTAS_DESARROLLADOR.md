@@ -10,19 +10,37 @@
 
 ## Índice
 
-1. [Requisitos previos](#1-requisitos-previos)
-2. [Crear el proyecto Supabase](#2-crear-el-proyecto-supabase)
-3. [Instalar Supabase CLI y vincular el proyecto](#3-instalar-supabase-cli-y-vincular-el-proyecto)
-4. [Aplicar el schema de base de datos](#4-aplicar-el-schema-de-base-de-datos)
-5. [Configurar GEMINI_API_KEY en Supabase](#5-configurar-gemini_api_key-en-supabase)
-6. [Desplegar las Edge Functions](#6-desplegar-las-edge-functions)
-7. [Configurar el entorno Flutter](#7-configurar-el-entorno-flutter)
-8. [Verificar la app en local](#8-verificar-la-app-en-local)
-9. [Configurar GitHub Secrets para CI/CD](#9-configurar-github-secrets-para-cicd)
-10. [Hacer el merge del PR](#10-hacer-el-merge-del-pr)
-11. [Referencia rápida de variables](#11-referencia-rápida-de-variables)
-12. [Qué hace cada archivo clave](#12-qué-hace-cada-archivo-clave)
-13. [Problemas frecuentes](#13-problemas-frecuentes)
+- [Notas para el desarrollador — KAIROS](#notas-para-el-desarrollador--kairos)
+  - [Índice](#índice)
+  - [1. Requisitos previos](#1-requisitos-previos)
+  - [2. Crear el proyecto Supabase](#2-crear-el-proyecto-supabase)
+  - [3. Instalar Supabase CLI y vincular el proyecto](#3-instalar-supabase-cli-y-vincular-el-proyecto)
+  - [4. Aplicar el schema de base de datos](#4-aplicar-el-schema-de-base-de-datos)
+  - [5. Configurar GEMINI\_API\_KEY en Supabase](#5-configurar-gemini_api_key-en-supabase)
+  - [6. Desplegar las Edge Functions](#6-desplegar-las-edge-functions)
+  - [7. Configurar el entorno Flutter](#7-configurar-el-entorno-flutter)
+    - [7.1 Rellenar `frontend/.env`](#71-rellenar-frontendenv)
+    - [7.2 Instalar dependencias Flutter](#72-instalar-dependencias-flutter)
+    - [7.3 Verificar análisis estático](#73-verificar-análisis-estático)
+  - [8. Verificar la app en local](#8-verificar-la-app-en-local)
+    - [Tests automáticos](#tests-automáticos)
+    - [App en emulador / dispositivo](#app-en-emulador--dispositivo)
+    - [Build web (opcional antes de CI)](#build-web-opcional-antes-de-ci)
+  - [9. Configurar GitHub Secrets para CI/CD](#9-configurar-github-secrets-para-cicd)
+  - [10. Hacer el merge del PR](#10-hacer-el-merge-del-pr)
+  - [11. Referencia rápida de variables](#11-referencia-rápida-de-variables)
+    - [`frontend/.env` (nunca al repo)](#frontendenv-nunca-al-repo)
+    - [Supabase Edge Functions Secrets (vía CLI, nunca al repo)](#supabase-edge-functions-secrets-vía-cli-nunca-al-repo)
+    - [GitHub Actions Secrets (vía interfaz web de GitHub)](#github-actions-secrets-vía-interfaz-web-de-github)
+  - [12. Qué hace cada archivo clave](#12-qué-hace-cada-archivo-clave)
+  - [13. Problemas frecuentes](#13-problemas-frecuentes)
+    - [`MissingPluginException` al arrancar Flutter](#missingpluginexception-al-arrancar-flutter)
+    - [`Bad state: No element` en fetchTasks](#bad-state-no-element-en-fetchtasks)
+    - [Edge Function devuelve siempre el fallback estoico](#edge-function-devuelve-siempre-el-fallback-estoico)
+    - [`SUPABASE_URL` o `SUPABASE_ANON_KEY` null en runtime](#supabase_url-o-supabase_anon_key-null-en-runtime)
+    - [CI falla con `secrets.SUPABASE_URL` vacío](#ci-falla-con-secretssupabase_url-vacío)
+    - [GitHub Pages muestra pantalla en blanco](#github-pages-muestra-pantalla-en-blanco)
+    - [`flutter test` falla con imports `package:kairos/...`](#flutter-test-falla-con-imports-packagekairos)
 
 ---
 
@@ -36,7 +54,7 @@ Instala estas herramientas si no las tienes:
 | Dart | incluido con Flutter | — |
 | Supabase CLI | 2.x | `npm install -g supabase@latest` |
 | Node.js | 18+ (para Supabase CLI) | https://nodejs.org |
-| Deno | 1.x | https://deno.land |
+| Deno | 1.x | https://irm https://deno.land/install.ps1 | iexdeno.land |
 | Git | cualquiera | — |
 
 Verifica que todo está instalado:
