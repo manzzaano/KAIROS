@@ -13,8 +13,11 @@ dependencies:
 
   cupertino_icons: ^1.0.6
 
-  # HTTP & API
-  dio: ^5.3.0
+  # Supabase
+  supabase_flutter: ^2.5.0
+
+  # HTTP (SSE streaming para debt-reflection)
+  http: ^1.2.0
 
   # State Management
   provider: ^6.0.0
@@ -26,8 +29,9 @@ dependencies:
   intl: ^0.19.0
   uuid: ^4.0.0
   shared_preferences: ^2.2.0
+  flutter_dotenv: ^6.0.1
 
-  # Typography (brutalist design system)
+  # Typography
   google_fonts: ^6.1.0
 
   # Location
@@ -35,12 +39,11 @@ dependencies:
 
   # OAuth
   google_sign_in: ^6.2.0
-  flutter_dotenv: ^6.0.1
-  # sign_in_with_apple: ^5.0.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  mocktail: ^1.0.0
   flutter_lints: ^2.0.0
 
 flutter:
