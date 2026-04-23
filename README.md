@@ -2,14 +2,14 @@
 
 <br/>
 
-```
+<pre align="center">
 ██╗  ██╗ █████╗ ██╗██████╗  ██████╗ ███████╗
 ██║ ██╔╝██╔══██╗██║██╔══██╗██╔═══██╗██╔════╝
 █████╔╝ ███████║██║██████╔╝██║   ██║███████╗
 ██╔═██╗ ██╔══██║██║██╔══██╗██║   ██║╚════██║
 ██║  ██╗██║  ██║██║██║  ██║╚██████╔╝███████║
 ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝
-```
+</pre>
 
 <h3><em>EL MOMENTO OPORTUNO</em></h3>
 
@@ -55,36 +55,62 @@ La filosofía es simple: el tiempo no gestionado no desaparece, se convierte en 
 
 <div align="center">
 
-```
-┌─────────────────────────────────────────────┐
-│              Flutter App (cliente)           │
-│  Provider · GoRouter · Dio · Google Fonts    │
-│                                             │
-│  Dashboard → Túnel → Foco → Confesionario   │
-│  Perfil → Geovallado → Onboarding           │
-└───────────────────┬─────────────────────────┘
-                    │ HTTP / JWT
-┌───────────────────▼─────────────────────────┐
-│             FastAPI Backend (actual)         │
-│  /api/v1/tasks · /api/v1/auth               │
-│  /api/v1/confessional                        │
-│                                             │
-│  SQLAlchemy ORM → PostgreSQL / SQLite        │
-│  JWT (python-jose + passlib)                 │
-│  Gemini Pro (optimización de tareas)         │
-│  Gemini 1.5 Flash (reflexión SSE streaming) │
-└─────────────────────────────────────────────┘
-
-                  ↓ Migración en curso
-
-┌─────────────────────────────────────────────┐
-│          Supabase (arquitectura futura)      │
-│  Auth · PostgreSQL · RLS · Edge Functions   │
-│                                             │
-│  optimize-tasks  →  Gemini proxy (Deno)     │
-│  debt-reflection →  SSE streaming (Deno)    │
-└─────────────────────────────────────────────┘
-```
+<table>
+  <thead>
+    <tr>
+      <th colspan="2" align="center">📱 Flutter App &nbsp;—&nbsp; Cliente</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td colspan="2" align="center">
+        <code>Provider</code> &nbsp;·&nbsp; <code>GoRouter</code> &nbsp;·&nbsp; <code>Dio</code> &nbsp;·&nbsp; <code>Google Fonts</code><br/>
+        Dashboard &nbsp;→&nbsp; Túnel &nbsp;→&nbsp; Foco &nbsp;→&nbsp; Confesionario &nbsp;→&nbsp; Perfil &nbsp;→&nbsp; Geovallado
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2" align="center"><strong>⬇️ &nbsp; HTTP / JWT &nbsp; ⬇️</strong></td>
+    </tr>
+    <tr>
+      <th align="center">🐍 FastAPI &nbsp;<em>(actual)</em></th>
+      <th align="center">⚡ Supabase &nbsp;<em>(futuro)</em></th>
+    </tr>
+    <tr>
+      <td align="center">
+        <code>/api/v1/tasks</code><br/>
+        <code>/api/v1/auth</code><br/>
+        <code>/api/v1/confessional</code><br/>
+        <br/>
+        SQLAlchemy ORM<br/>
+        PostgreSQL / SQLite<br/>
+        JWT — python-jose + passlib
+      </td>
+      <td align="center">
+        Supabase Auth<br/>
+        PostgreSQL + RLS<br/>
+        Edge Functions (Deno)<br/>
+        <br/>
+        <code>optimize-tasks</code><br/>
+        <code>debt-reflection</code>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2" align="center"><strong>⬇️ &nbsp; Gemini API &nbsp; ⬇️</strong></td>
+    </tr>
+    <tr>
+      <td align="center">
+        <strong>Gemini Pro</strong><br/>
+        Optimización de tareas<br/>
+        (reordenación cognitiva)
+      </td>
+      <td align="center">
+        <strong>Gemini 1.5 Flash</strong><br/>
+        Reflexión estoica<br/>
+        (SSE streaming)
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 </div>
 
