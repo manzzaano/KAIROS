@@ -18,7 +18,7 @@ const geminiResponse = {
   }],
 };
 
-globalThis.fetch = async (_url: string) =>
+globalThis.fetch = async (_input: RequestInfo | URL) =>
   new Response(JSON.stringify(geminiResponse), {
     headers: { "Content-Type": "application/json" },
   });
