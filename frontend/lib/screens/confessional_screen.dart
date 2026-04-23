@@ -6,8 +6,9 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/task_provider.dart';
-import '../services/api_client.dart';
+import '../services/reflection_service.dart';
 import '../utils/constants.dart';
+import '../utils/debt_utils.dart';
 import '../utils/strings.dart';
 import '../utils/theme.dart';
 import '../widgets/debt_severity_card.dart';
@@ -21,43 +22,24 @@ class ConfessionalScreen extends StatefulWidget {
 }
 
 class _ConfessionalScreenState extends State<ConfessionalScreen> {
-  final ApiClient _apiClient = ApiClient();
+  final ReflectionService _reflectionService = ReflectionService();
   StreamSubscription<String>? _streamSub;
 
   String _reflection = '';
-  bool _isLoadingSeverity = false;
   bool _isStreaming = false;
-  Map<String, dynamic>? _debtSeverity;
-  String? _severityError;
 
   @override
   void initState() {
     super.initState();
-    _fetchSeverity();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<TaskProvider>().fetchDebt();
+    });
   }
 
   @override
   void dispose() {
     _streamSub?.cancel();
     super.dispose();
-  }
-
-  Future<void> _fetchSeverity() async {
-    setState(() {
-      _isLoadingSeverity = true;
-      _severityError = null;
-    });
-    try {
-      final severity = await _apiClient.getDebtSeverity();
-      if (!mounted) return;
-      setState(() => _debtSeverity = severity);
-    } catch (e) {
-      if (!mounted) return;
-      setState(() =>
-          _severityError = e.toString().replaceFirst('Exception: ', ''));
-    } finally {
-      if (mounted) setState(() => _isLoadingSeverity = false);
-    }
   }
 
   void _startReflection() {
@@ -67,31 +49,38 @@ class _ConfessionalScreenState extends State<ConfessionalScreen> {
       _isStreaming = true;
     });
 
-    _streamSub = _apiClient.getReflectionStream().listen(
-      (chunk) {
-        if (!mounted) return;
-        setState(() => _reflection += chunk);
-      },
-      onError: (Object e) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-                e.toString().replaceFirst('Exception: ', '')),
-          ),
+    final taskProvider = context.read<TaskProvider>();
+    final recentAbandons =
+        taskProvider.tasks.where((t) => t.abandoned).length;
+
+    _streamSub = _reflectionService
+        .streamReflection(
+          totalDebtMinutes: taskProvider.debtTotalMinutes,
+          streakDays: taskProvider.streakDays,
+          sessionsCompleted: taskProvider.sessionsCompleted,
+          recentAbandons: recentAbandons,
+        )
+        .listen(
+          (chunk) {
+            if (!mounted) return;
+            setState(() => _reflection += chunk);
+          },
+          onError: (Object e) {
+            if (!mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))),
+            );
+            setState(() => _isStreaming = false);
+          },
+          onDone: () {
+            if (!mounted) return;
+            setState(() => _isStreaming = false);
+          },
         );
-        setState(() => _isStreaming = false);
-      },
-      onDone: () {
-        if (!mounted) return;
-        setState(() => _isStreaming = false);
-      },
-    );
   }
 
   void _showPayDebtSheet() {
-    final debtMinutes =
-        _debtSeverity?['total_debt_minutes'] as int? ?? 0;
+    final taskProvider = context.read<TaskProvider>();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -101,32 +90,36 @@ class _ConfessionalScreenState extends State<ConfessionalScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (_) => _PayDebtSheet(
-        debtMinutes: debtMinutes,
+        debtMinutes: taskProvider.debtTotalMinutes,
         onConfirm: (minutes) async {
           Navigator.pop(context);
           final provider = context.read<TaskProvider>();
           await provider.payDebt(minutes);
           if (!mounted) return;
           if (provider.error != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(provider.error!)),
-            );
+            ScaffoldMessenger.of(context)
+                .showSnackBar(SnackBar(content: Text(provider.error!)));
           } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                    '$minutes min pagados · Deuda restante: ${provider.debtTotalMinutes} min'),
-              ),
-            );
-            _fetchSeverity();
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text(
+                  '$minutes min pagados · Deuda restante: ${provider.debtTotalMinutes} min'),
+            ));
           }
         },
       ),
     );
   }
 
+  Map<String, String> _severity(TaskProvider provider) => analyzeDebtSeverity(
+        totalDebtMinutes: provider.debtTotalMinutes,
+        freeTimeMinutes: provider.freeTimeMinutes,
+      );
+
   @override
   Widget build(BuildContext context) {
+    final taskProvider = context.watch<TaskProvider>();
+    final severity = _severity(taskProvider);
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -164,7 +157,19 @@ class _ConfessionalScreenState extends State<ConfessionalScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildSeveritySection(),
+                    if (taskProvider.isLoading)
+                      const Center(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 24),
+                          child: CircularProgressIndicator(
+                              color: KairosColors.error600, strokeWidth: 1),
+                        ),
+                      )
+                    else
+                      DebtSeverityCard(severity: {
+                        ...severity,
+                        'total_debt_minutes': taskProvider.debtTotalMinutes,
+                      }),
                     const SizedBox(height: 20),
                     ReflectionDisplay(
                       text: _reflection,
@@ -185,32 +190,6 @@ class _ConfessionalScreenState extends State<ConfessionalScreen> {
         ),
       ),
     );
-  }
-
-  Widget _buildSeveritySection() {
-    if (_isLoadingSeverity) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 24),
-          child: CircularProgressIndicator(
-              color: KairosColors.error600, strokeWidth: 1),
-        ),
-      );
-    }
-    if (_debtSeverity != null) {
-      return DebtSeverityCard(severity: _debtSeverity!);
-    }
-    if (_severityError != null) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Text(
-          _severityError!,
-          style: KairosTheme.mono(
-              size: 9, color: KairosColors.error600, letterSpacing: 1),
-        ),
-      );
-    }
-    return const SizedBox.shrink();
   }
 }
 
@@ -276,13 +255,10 @@ class _ActionBar extends StatelessWidget {
                       width: 18,
                       height: 18,
                       child: CircularProgressIndicator(
-                          strokeWidth: 1.5,
-                          color: KairosColors.neutral900),
+                          strokeWidth: 1.5, color: KairosColors.neutral900),
                     )
                   : Text(
-                      hasReflection
-                          ? 'REGENERAR REFLEXIÓN'
-                          : 'GENERAR REFLEXIÓN',
+                      hasReflection ? 'REGENERAR REFLEXIÓN' : 'GENERAR REFLEXIÓN',
                       style: KairosTheme.mono(
                           size: 11,
                           weight: FontWeight.w700,
@@ -364,17 +340,11 @@ class _PayDebtSheetState extends State<_PayDebtSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'PAGAR DEUDA',
-            style:
-                KairosTheme.mono(size: 11, letterSpacing: 2),
-          ),
+          Text('PAGAR DEUDA',
+              style: KairosTheme.mono(size: 11, letterSpacing: 2)),
           const SizedBox(height: 6),
-          Text(
-            'Deuda total: ${widget.debtMinutes} min',
-            style: KairosTheme.serif(
-                size: 14, color: KairosColors.neutral400),
-          ),
+          Text('Deuda total: ${widget.debtMinutes} min',
+              style: KairosTheme.serif(size: 14, color: KairosColors.neutral400)),
           const SizedBox(height: 20),
           TextField(
             controller: _ctrl,
@@ -385,21 +355,21 @@ class _PayDebtSheetState extends State<_PayDebtSheet> {
             decoration: InputDecoration(
               hintText: 'Minutos',
               suffixText: 'MIN',
-              hintStyle: KairosTheme.serif(
-                  size: 28, color: KairosColors.neutral700),
-              suffixStyle: KairosTheme.mono(
-                  size: 9, color: KairosColors.neutral400),
+              hintStyle:
+                  KairosTheme.serif(size: 28, color: KairosColors.neutral700),
+              suffixStyle:
+                  KairosTheme.mono(size: 9, color: KairosColors.neutral400),
               border: const UnderlineInputBorder(
-                borderSide: BorderSide(
-                    color: KairosColors.neutral700, width: 0.5),
+                borderSide:
+                    BorderSide(color: KairosColors.neutral700, width: 0.5),
               ),
               enabledBorder: const UnderlineInputBorder(
-                borderSide: BorderSide(
-                    color: KairosColors.neutral700, width: 0.5),
+                borderSide:
+                    BorderSide(color: KairosColors.neutral700, width: 0.5),
               ),
               focusedBorder: const UnderlineInputBorder(
-                borderSide: BorderSide(
-                    color: KairosColors.neutral400, width: 1),
+                borderSide:
+                    BorderSide(color: KairosColors.neutral400, width: 1),
               ),
               contentPadding: const EdgeInsets.symmetric(vertical: 8),
             ),
@@ -432,16 +402,13 @@ class _PayDebtSheetState extends State<_PayDebtSheet> {
                       width: 18,
                       height: 18,
                       child: CircularProgressIndicator(
-                          strokeWidth: 1.5,
-                          color: KairosColors.neutral50),
+                          strokeWidth: 1.5, color: KairosColors.neutral50),
                     )
-                  : Text(
-                      'CONFIRMAR',
+                  : Text('CONFIRMAR',
                       style: KairosTheme.mono(
                           size: 12,
                           weight: FontWeight.w700,
-                          letterSpacing: 2),
-                    ),
+                          letterSpacing: 2)),
             ),
           ),
         ],

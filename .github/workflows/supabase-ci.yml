@@ -1,0 +1,28 @@
+name: Supabase Functions CI
+
+on:
+  push:
+    branches: [main, feat/supabase-migration]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+
+      - name: Test optimize-tasks
+        run: deno test --allow-env --allow-net supabase/functions/optimize-tasks/optimize_test.ts
+        env:
+          GEMINI_API_KEY: test-key
+
+      - name: Test debt-reflection
+        run: deno test --allow-env --allow-net supabase/functions/debt-reflection/reflection_test.ts
+        env:
+          GEMINI_API_KEY: test-key

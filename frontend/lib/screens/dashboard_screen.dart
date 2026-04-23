@@ -89,7 +89,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       task: tasks[i],
                       onToggle: (t) {
                         if (t.completed && !tasks[i].completed) {
-                          taskProvider.completeTask(int.parse(tasks[i].id));
+                          taskProvider.completeTask(tasks[i].id);
                         }
                       },
                     ),
