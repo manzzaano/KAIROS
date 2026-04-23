@@ -1,15 +1,19 @@
 import 'package:flutter/foundation.dart';
 
 import '../models/task.dart';
-import '../services/api_client.dart';
+import '../services/supabase_client.dart';
+import '../services/task_service.dart';
 
 class TaskProvider extends ChangeNotifier {
-  final ApiClient _api = ApiClient();
+  final TaskService _service;
 
   List<Task> _tasks = [];
   Map<String, dynamic>? _debt;
   bool _isLoading = false;
   String? _error;
+
+  TaskProvider({TaskService? service})
+      : _service = service ?? TaskService(supabaseClient);
 
   List<Task> get tasks => _tasks;
   Map<String, dynamic>? get debt => _debt;
@@ -20,16 +24,13 @@ class TaskProvider extends ChangeNotifier {
   int get debtHours => debtTotalMinutes ~/ 60;
   int get debtMinutes => debtTotalMinutes % 60;
   int get streakDays => (_debt?['streak_days'] as int?) ?? 0;
+  int get freeTimeMinutes => (_debt?['free_time_minutes'] as int?) ?? 0;
   int get sessionsCompleted => _tasks.where((t) => t.completed).length;
 
   Future<void> fetchTasks({String status = 'all'}) async {
     _setLoading(true);
     try {
-      final response = await _api.getTasksList(status: status);
-      final list = response['tasks'] as List<dynamic>? ?? [];
-      _tasks = list
-          .map((e) => Task.fromJson(Map<String, dynamic>.from(e as Map)))
-          .toList();
+      _tasks = await _service.fetchTasks(status: status);
       _error = null;
     } catch (e) {
       _error = _clean(e.toString());
@@ -41,7 +42,7 @@ class TaskProvider extends ChangeNotifier {
   Future<void> fetchDebt() async {
     _setLoading(true);
     try {
-      _debt = await _api.getProductivityDebt();
+      _debt = await _service.fetchDebt();
       _error = null;
     } catch (e) {
       _error = _clean(e.toString());
@@ -60,7 +61,7 @@ class TaskProvider extends ChangeNotifier {
   }) async {
     _setLoading(true);
     try {
-      final json = await _api.createTask(
+      final task = await _service.createTask(
         title: title,
         priority: priority,
         energy: energy,
@@ -68,7 +69,7 @@ class TaskProvider extends ChangeNotifier {
         latitude: latitude,
         longitude: longitude,
       );
-      _tasks.insert(0, Task.fromJson(json));
+      _tasks.insert(0, task);
       _error = null;
     } catch (e) {
       _error = _clean(e.toString());
@@ -78,10 +79,11 @@ class TaskProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> completeTask(int taskId) async {
+  Future<void> completeTask(String taskId) async {
     try {
-      final json = await _api.completeTask(taskId);
-      _updateTaskInList(Task.fromJson(json));
+      final task = _tasks.firstWhere((t) => t.id == taskId);
+      final updated = await _service.completeTask(taskId, task.estimatedMinutes);
+      _updateTaskInList(updated);
       await fetchDebt();
     } catch (e) {
       _error = _clean(e.toString());
@@ -89,10 +91,11 @@ class TaskProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> abandonTask(int taskId) async {
+  Future<void> abandonTask(String taskId) async {
     try {
-      final json = await _api.abandonTask(taskId);
-      _updateTaskInList(Task.fromJson(json));
+      final task = _tasks.firstWhere((t) => t.id == taskId);
+      final updated = await _service.abandonTask(taskId, task.estimatedMinutes);
+      _updateTaskInList(updated);
       await fetchDebt();
     } catch (e) {
       _error = _clean(e.toString());
@@ -100,10 +103,10 @@ class TaskProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> deleteTask(int taskId) async {
+  Future<void> deleteTask(String taskId) async {
     try {
-      await _api.deleteTask(taskId);
-      _tasks.removeWhere((t) => t.id == taskId.toString());
+      await _service.deleteTask(taskId);
+      _tasks.removeWhere((t) => t.id == taskId);
       notifyListeners();
     } catch (e) {
       _error = _clean(e.toString());
@@ -114,7 +117,7 @@ class TaskProvider extends ChangeNotifier {
   Future<void> payDebt(int minutesPaid) async {
     _setLoading(true);
     try {
-      _debt = await _api.payDebt(minutesPaid);
+      _debt = await _service.payDebt(minutesPaid);
       _error = null;
     } catch (e) {
       _error = _clean(e.toString());
@@ -132,12 +135,10 @@ class TaskProvider extends ChangeNotifier {
       int abandoned = 0;
       for (final task in _tasks) {
         if (task.completed && task.completedAt != null) {
-          final d = task.completedAt!;
-          if (_sameDay(d, day)) completed++;
+          if (_sameDay(task.completedAt!, day)) completed++;
         }
         if (task.abandoned && task.abandonedAt != null) {
-          final d = task.abandonedAt!;
-          if (_sameDay(d, day)) abandoned++;
+          if (_sameDay(task.abandonedAt!, day)) abandoned++;
         }
       }
       return {'completed': completed, 'abandoned': abandoned};
@@ -146,14 +147,12 @@ class TaskProvider extends ChangeNotifier {
 
   void _updateTaskInList(Task updated) {
     final idx = _tasks.indexWhere((t) => t.id == updated.id);
-    if (idx >= 0) {
-      _tasks[idx] = updated;
-    }
+    if (idx >= 0) _tasks[idx] = updated;
     notifyListeners();
   }
 
-  void _setLoading(bool value) {
-    _isLoading = value;
+  void _setLoading(bool v) {
+    _isLoading = v;
     notifyListeners();
   }
 

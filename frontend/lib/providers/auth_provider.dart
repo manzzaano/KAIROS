@@ -1,19 +1,25 @@
 import 'dart:developer' as developer;
 
 import 'package:flutter/foundation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as supa;
 
 import '../models/user.dart';
-import '../services/api_client.dart';
+import '../services/auth_service.dart';
 import '../services/storage_service.dart';
+import '../services/supabase_client.dart';
 
 class AuthProvider extends ChangeNotifier {
-  final ApiClient _apiClient = ApiClient();
-  final StorageService _storage = StorageService();
+  final AuthService _auth;
+  final StorageService _storage;
 
   User? _user;
   bool _isLoading = false;
   String? _error;
   bool _hasSeenOnboarding = false;
+
+  AuthProvider({AuthService? auth, StorageService? storage})
+      : _auth = auth ?? AuthService(supabaseClient),
+        _storage = storage ?? StorageService();
 
   User? get user => _user;
   bool get isLoading => _isLoading;
@@ -23,32 +29,29 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> bootstrap() async {
     _hasSeenOnboarding = await _storage.getHasSeenOnboarding();
-    await checkToken();
-  }
-
-  Future<void> _persistUser(Map<String, dynamic> response, {String? fallbackEmail}) async {
-    final user = User.fromJson(response);
-    await _storage.saveToken(user.access_token);
-    await _storage.saveUsername(user.username);
-    _user = User(
-      id: user.id,
-      email: user.email.isNotEmpty ? user.email : (fallbackEmail ?? ''),
-      username: user.username,
-      access_token: user.access_token,
-    );
+    final supaUser = _auth.currentUser;
+    if (supaUser != null) _user = User.fromSupabase(supaUser);
+    _auth.authStateChanges.listen((state) {
+      _user = state.session?.user != null
+          ? User.fromSupabase(state.session!.user!)
+          : null;
+      notifyListeners();
+    });
+    notifyListeners();
   }
 
   Future<void> login(String email, String password) async {
     _setLoading(true);
     try {
-      developer.log('login intento · $email · baseUrl=${_apiClient.dio.options.baseUrl}',
-          name: 'AuthProvider');
-      final response = await _apiClient.login(email, password);
-      await _persistUser(response, fallbackEmail: email);
+      final response = await _auth.signIn(email, password);
+      _user = response.user != null ? User.fromSupabase(response.user!) : null;
       _error = null;
+    } on supa.AuthException catch (e) {
+      _error = e.message;
+      _user = null;
     } catch (e, st) {
-      developer.log('login falló: $e', name: 'AuthProvider', error: e, stackTrace: st);
-      _error = _clean(e.toString());
+      developer.log('login falló', name: 'AuthProvider', error: e, stackTrace: st);
+      _error = 'Inicio de sesión falló';
       _user = null;
     } finally {
       _setLoading(false);
@@ -58,13 +61,15 @@ class AuthProvider extends ChangeNotifier {
   Future<void> register(String email, String username, String password) async {
     _setLoading(true);
     try {
-      developer.log('register intento · $email · $username', name: 'AuthProvider');
-      final response = await _apiClient.register(email, username, password);
-      await _persistUser(response, fallbackEmail: email);
+      final response = await _auth.signUp(email, password, username);
+      _user = response.user != null ? User.fromSupabase(response.user!) : null;
       _error = null;
+    } on supa.AuthException catch (e) {
+      _error = e.message;
+      _user = null;
     } catch (e, st) {
-      developer.log('register falló: $e', name: 'AuthProvider', error: e, stackTrace: st);
-      _error = _clean(e.toString());
+      developer.log('register falló', name: 'AuthProvider', error: e, stackTrace: st);
+      _error = 'Registro falló';
       _user = null;
     } finally {
       _setLoading(false);
@@ -72,64 +77,26 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> loginWithGoogle() async {
-    await _oauthMock('google');
-  }
-
-  Future<void> loginWithApple() async {
-    await _oauthMock('apple');
-  }
-
-  Future<void> _oauthMock(String provider) async {
-    _setLoading(true);
-    try {
-      developer.log('oauth $provider intento', name: 'AuthProvider');
-      final response = await _apiClient.oauthLogin(provider, 'mock-id-token');
-      await _persistUser(response);
-      _error = null;
-    } catch (e, st) {
-      developer.log('oauth $provider falló: $e', name: 'AuthProvider', error: e, stackTrace: st);
-      _error = _clean(e.toString());
-      _user = null;
-    } finally {
-      _setLoading(false);
-    }
-  }
-
-  Future<void> logout() async {
-    await _storage.clearToken();
-    _user = null;
-    _error = null;
+    _error = 'Google Sign-In no implementado aún';
     notifyListeners();
   }
 
-  Future<void> checkToken() async {
-    _setLoading(true);
-    try {
-      final token = await _storage.getToken();
-      if (token != null && token.isNotEmpty) {
-        final username = await _storage.getUsername() ?? '';
-        _user = User(id: 0, email: '', username: username, access_token: token);
-      } else {
-        _user = null;
-      }
-      _error = null;
-    } catch (e) {
-      _error = _clean(e.toString());
-      _user = null;
-    } finally {
-      _setLoading(false);
-    }
+  Future<void> loginWithApple() async {
+    _error = 'Apple Sign-In no implementado aún';
+    notifyListeners();
+  }
+
+  Future<void> logout() async {
+    await _auth.signOut();
+    _user = null;
+    _error = null;
+    notifyListeners();
   }
 
   Future<void> markOnboardingSeen() async {
     _hasSeenOnboarding = true;
     await _storage.setHasSeenOnboarding(true);
     notifyListeners();
-  }
-
-  String _clean(String raw) {
-    final prefix = 'Exception: ';
-    return raw.startsWith(prefix) ? raw.substring(prefix.length) : raw;
   }
 
   void _setLoading(bool value) {
