@@ -1,0 +1,60 @@
+Proyecto Final de Ciclo – Desarrollo de Aplicación
+
+El alumnado deberá desarrollar una aplicación completa basada en el diseño previamente evaluado.
+
+El proyecto se organizará en tres entregas parciales obligatorias, con el objetivo de garantizar un desarrollo progresivo, funcional y profesional.
+
+📸 Requisitos de las capturas en el PDF de todas las entregas
+
+Las capturas incluidas en el PDF deben cumplir las siguientes condiciones:
+
+    Deben tener tamaño suficiente y buena resolución, permitiendo leer correctamente textos y elementos de la interfaz
+    No se deben incluir múltiples capturas pequeñas en una misma imagen
+    Cada captura debe ir acompañada de una breve explicación
+    Las capturas deben reflejar claramente la aplicación en ejecución real
+    Se deben mostrar pantallas completas, evitando recortes que dificulten la comprensión
+    Se debe poder identificar fácilmente qué funcionalidad se está mostrando
+
+⚠️ No se evaluarán correctamente aquellas entregas cuyas capturas no permitan verificar el funcionamiento de la aplicación.
+
+📌 Condiciones generales
+
+    Todas las entregas son obligatorias
+    El proyecto debe evolucionar entre entregas
+    No se aceptarán entregas sin progreso real
+    El PDF debe reflejar claramente el trabajo realizado y la identificación del alumnado.
+    Las capturas deben mostrar claramente que la aplicación está en ejecución real (no se aceptarán diseños estáticos o imágenes simuladas)
+
+🚫 Importante
+
+La primera entrega debe demostrar un desarrollo real del proyecto.
+No se aceptarán entregas superficiales o sin funcionalidad mínima implementada.
+
+Asimismo, todas las entregas deberán incluir evidencias del acceso a la parte backend cuando el proyecto lo requiera.
+
+Entrega 1 – Base funcional REAL (20%)
+📄 Formato de entrega:
+
+Se entregará únicamente un PDF con evidencias del trabajo realizado.
+📌 El PDF deberá incluir:
+
+    Capturas de la aplicación en ejecución
+    Fragmentos de código relevantes
+    Explicación breve del funcionamiento implementado
+    Evidencias de navegación entre pantallas
+    Evidencias de acceso a datos (aunque sean simulados)
+    Evidencias de la parte backend (si aplica)
+    Identificación del alumnado.
+
+🎯 Requisitos:
+
+    La aplicación debe compilar y ejecutarse
+    Debe existir navegación funcional real (no simulada)
+    Debe haber al menos una funcionalidad principal parcialmente operativa
+    Estructura del proyecto coherente
+
+⚠️ No se aceptarán:
+
+    Aplicaciones sin funcionalidad real
+    Navegación simulada sin lógica
+

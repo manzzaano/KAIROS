@@ -1,0 +1,61 @@
+{
+  "designSystem": {
+    "name": "Dark Glassmorphism",
+    "theme": "dark",
+    "colors": {
+      "background": "#050505",
+      "surfaceGlass": "rgba(255, 255, 255, 0.03)",
+      "surfaceGlassHover": "rgba(255, 255, 255, 0.08)",
+      "borderLight": "rgba(255, 255, 255, 0.15)",
+      "borderHighlight": "rgba(255, 255, 255, 0.4)",
+      "textPrimary": "#FFFFFF",
+      "textSecondary": "rgba(255, 255, 255, 0.6)",
+      "glowCool": "rgba(160, 185, 210, 0.5)",
+      "glowWarm": "rgba(240, 230, 215, 0.5)"
+    },
+    "shapes": {
+      "pill": "9999px",
+      "rounded": "24px"
+    },
+    "effects": {
+      "blurBase": "blur(16px)",
+      "shadowDrop": "0 8px 32px 0 rgba(0, 0, 0, 0.4)",
+      "shadowInner": "inset 0 1px 1px rgba(255, 255, 255, 0.1)"
+    },
+    "components": {
+      "button": {
+        "background": "linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%)",
+        "backdropFilter": "{effects.blurBase}",
+        "border": "1px solid {colors.borderLight}",
+        "borderRadius": "{shapes.pill}",
+        "boxShadow": "{effects.shadowDrop}, {effects.shadowInner}",
+        "color": "{colors.textPrimary}",
+        "padding": "12px 32px",
+        "transition": "all 0.3s ease"
+      },
+      "card": {
+        "background": "{colors.surfaceGlass}",
+        "backdropFilter": "{effects.blurBase}",
+        "border": "1px solid {colors.borderLight}",
+        "borderRadius": "{shapes.rounded}",
+        "boxShadow": "{effects.shadowDrop}",
+        "padding": "24px"
+      },
+      "input": {
+        "background": "rgba(0, 0, 0, 0.3)",
+        "backdropFilter": "{effects.blurBase}",
+        "border": "1px solid {colors.borderLight}",
+        "borderRadius": "{shapes.pill}",
+        "color": "{colors.textPrimary}",
+        "padding": "14px 24px"
+      },
+      "tag": {
+        "background": "{colors.surfaceGlass}",
+        "border": "1px solid rgba(255,255,255,0.08)",
+        "borderRadius": "{shapes.pill}",
+        "color": "{colors.textSecondary}",
+        "padding": "6px 16px"
+      }
+    }
+  }
+}

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>KAIROS 2.0 — Pantallas</title>
+<link rel="stylesheet" href="styles.css" />
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  body { background: #f0eee9; }
+  .header-strip {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    padding: 14px 22px; display: flex; align-items: center; gap: 14px;
+    background: rgba(240,238,233,0.85); backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  .header-strip .logo {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 14px; font-weight: 600; color: #2a251f; letter-spacing: -0.01em;
+  }
+  .header-strip .meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: rgba(60,50,40,0.55); letter-spacing: 0.04em;
+  }
+</style>
+</head>
+<body>
+<template id="__bundler_thumbnail" data-bg-color="#0a0a0a">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#0a0a0a"/>
+    <g transform="translate(600 400)">
+      <circle r="160" fill="none" stroke="#262626" stroke-width="2"/>
+      <circle r="160" fill="none" stroke="#ff8040" stroke-width="3" stroke-dasharray="1005" stroke-dashoffset="380" transform="rotate(-90)" stroke-linecap="round"/>
+      <circle r="6" fill="#ff8040"/>
+      <line x1="0" y1="0" x2="0" y2="-110" stroke="#fafafa" stroke-width="3" stroke-linecap="round"/>
+      <line x1="0" y1="0" x2="80" y2="0" stroke="#fafafa" stroke-width="3" stroke-linecap="round"/>
+    </g>
+    <text x="600" y="640" text-anchor="middle" fill="#fafafa" font-family="Inter,system-ui,sans-serif" font-size="36" font-weight="600" letter-spacing="2">KAIROS</text>
+    <text x="600" y="680" text-anchor="middle" fill="#525252" font-family="ui-monospace,monospace" font-size="14" letter-spacing="3">v2.0 · CARGANDO</text>
+  </svg>
+</template>
+<div id="root"></div>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="kairos-icons.jsx"></script>
+<script type="text/babel" src="kairos-store.jsx"></script>
+<script type="text/babel" src="kairos-screens-auth.jsx"></script>
+<script type="text/babel" src="kairos-screens-tasks.jsx"></script>
+<script type="text/babel" src="kairos-screens-extras.jsx"></script>
+<script type="text/babel" src="kairos-app.jsx"></script>
+
+<script type="text/babel" data-presets="react">
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "accent": "#ff8040",
+  "showAllScreens": true
+}/*EDITMODE-END*/;
+
+// Frame wrapper — iPhone with our app inside
+const Phone = ({ children, label }) => (
+  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+    <IOSDevice width={390} height={844} dark={true}>
+      {children}
+    </IOSDevice>
+  </div>
+);
+
+// Static frozen-state versions (so the canvas shows variety even if main proto is on splash)
+const StaticDashboard = () => (
+  <div className="k-app">
+    <Dashboard tasks={SEED_TASKS} setTab={() => {}} openTask={() => {}} toggleTask={() => {}}
+      deleteTask={() => {}} openCreate={() => {}} openOptimize={() => {}} online={true} />
+    <TabBar tab="home" setTab={() => {}} />
+  </div>
+);
+const StaticList = () => (
+  <div className="k-app">
+    <TaskList tasks={SEED_TASKS} openTask={() => {}} toggleTask={() => {}} deleteTask={() => {}} openCreate={() => {}} />
+    <TabBar tab="list" setTab={() => {}} />
+  </div>
+);
+const StaticFocusLanding = () => (
+  <div className="k-app">
+    <FocusLanding tasks={SEED_TASKS} onStart={() => {}} />
+    <TabBar tab="focus" setTab={() => {}} />
+  </div>
+);
+const StaticStats = () => (
+  <div className="k-app">
+    <Stats />
+    <TabBar tab="stats" setTab={() => {}} />
+  </div>
+);
+const StaticProfile = () => (
+  <div className="k-app">
+    <Profile online={true} setOnline={() => {}} openSync={() => {}} openConflict={() => {}} onLogout={() => {}} />
+    <TabBar tab="profile" setTab={() => {}} />
+  </div>
+);
+const StaticTaskDetail = () => (
+  <TaskDetail task={SEED_TASKS[0]} onClose={() => {}} onToggle={() => {}} onDelete={() => {}} />
+);
+const StaticCreateTask = () => (
+  <CreateTask onCancel={() => {}} onSave={() => {}} />
+);
+const StaticSync = () => (
+  <div className="k-app">
+    <Profile online={true} setOnline={() => {}} openSync={() => {}} openConflict={() => {}} onLogout={() => {}} />
+    <TabBar tab="profile" setTab={() => {}} />
+    <SyncSheet onClose={() => {}} />
+  </div>
+);
+const StaticConflict = () => (
+  <div className="k-app">
+    <Profile online={true} setOnline={() => {}} openSync={() => {}} openConflict={() => {}} onLogout={() => {}} />
+    <TabBar tab="profile" setTab={() => {}} />
+    <ConflictSheet onClose={() => {}} onResolve={() => {}} />
+  </div>
+);
+const StaticOffline = () => (
+  <div className="k-app">
+    <Dashboard tasks={SEED_TASKS} setTab={() => {}} openTask={() => {}} toggleTask={() => {}}
+      deleteTask={() => {}} openCreate={() => {}} openOptimize={() => {}} online={false} />
+    <TabBar tab="home" setTab={() => {}} />
+    <OfflineBanner visible={true} />
+  </div>
+);
+const StaticOptimize = () => <Optimize onDone={() => {}} onCancel={() => {}} />;
+const StaticFocusActive = () => <Focus task={SEED_TASKS[0]} onClose={() => {}} />;
+
+function App() {
+  const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+  React.useEffect(() => { document.documentElement.style.setProperty('--k-accent', t.accent); }, [t.accent]);
+
+  return (
+    <>
+      <div className="header-strip">
+        <div className="logo">
+          <IconLogo size={20} color="#2a251f" />
+          KAIROS 2.0
+        </div>
+        <div className="meta">PROTOTIPO INTERACTIVO · 16 PANTALLAS · iOS</div>
+      </div>
+
+      <DesignCanvas>
+        <DCSection id="proto" title="Prototipo navegable" subtitle="Empieza aquí · Splash → Onboarding → Login → App. Toca cualquier elemento.">
+          <DCArtboard id="main" label="App completa · navegable" width={420} height={880}>
+            <Phone>
+              <Prototype accent={t.accent} />
+            </Phone>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="auth" title="Autenticación" subtitle="Splash → Onboarding (3 pasos) → Login">
+          <DCArtboard id="splash" label="01 · Splash" width={420} height={880}>
+            <Phone><Splash /></Phone>
+          </DCArtboard>
+          <DCArtboard id="onb1" label="02 · Onboarding · Offline-First" width={420} height={880}>
+            <Phone><Onboarding onDone={() => {}} /></Phone>
+          </DCArtboard>
+          <DCArtboard id="login" label="03 · Login" width={420} height={880}>
+            <Phone><Login onLogin={() => {}} /></Phone>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="main-screens" title="Navegación principal" subtitle="Tabs persistentes · Smart Agenda · Tareas · Enfoque · Stats · Perfil">
+          <DCArtboard id="dash" label="04 · Dashboard (Smart Agenda)" width={420} height={880}>
+            <Phone><StaticDashboard /></Phone>
+          </DCArtboard>
+          <DCArtboard id="list" label="05 · Lista de tareas" width={420} height={880}>
+            <Phone><StaticList /></Phone>
+          </DCArtboard>
+          <DCArtboard id="focusL" label="06 · Modo Enfoque (landing)" width={420} height={880}>
+            <Phone><StaticFocusLanding /></Phone>
+          </DCArtboard>
+          <DCArtboard id="stats" label="07 · Estadísticas" width={420} height={880}>
+            <Phone><StaticStats /></Phone>
+          </DCArtboard>
+          <DCArtboard id="profile" label="08 · Perfil" width={420} height={880}>
+            <Phone><StaticProfile /></Phone>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="task-flow" title="Gestión de tareas (CRUD)" subtitle="CU-01: Creación · CU-04: Completar (swipe gesture)">
+          <DCArtboard id="create" label="09 · Crear tarea" width={420} height={880}>
+            <Phone><StaticCreateTask /></Phone>
+          </DCArtboard>
+          <DCArtboard id="detail" label="10 · Detalle de tarea" width={420} height={880}>
+            <Phone><StaticTaskDetail /></Phone>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="ai-focus" title="IA y Deep Work" subtitle="CU-02: Optimización heurística · Modo enfoque activo">
+          <DCArtboard id="opt" label="11 · Optimizando con IA" width={420} height={880}>
+            <Phone><StaticOptimize /></Phone>
+          </DCArtboard>
+          <DCArtboard id="focus" label="12 · Modo Enfoque · activo" width={420} height={880}>
+            <Phone><StaticFocusActive /></Phone>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="sync" title="Sincronización offline-first" subtitle="CU-03: Sync · Conflictos · Estado sin red">
+          <DCArtboard id="syncing" label="13 · Sincronizando" width={420} height={880}>
+            <Phone><StaticSync /></Phone>
+          </DCArtboard>
+          <DCArtboard id="conflict" label="14 · Conflicto de versión" width={420} height={880}>
+            <Phone><StaticConflict /></Phone>
+          </DCArtboard>
+          <DCArtboard id="offline" label="15 · Modo offline" width={420} height={880}>
+            <Phone><StaticOffline /></Phone>
+          </DCArtboard>
+        </DCSection>
+      </DesignCanvas>
+
+      <TweaksPanel>
+        <TweakSection label="Apariencia" />
+        <TweakColor label="Color de acento" value={t.accent} onChange={(v) => setTweak('accent', v)} />
+        <TweakSection label="Atajos" />
+        <div style={{ fontSize: 11, color: 'rgba(41,38,27,0.6)', lineHeight: 1.5 }}>
+          El primer artboard es el prototipo navegable. El resto son estados estáticos. Doble-click sobre un artboard para abrirlo a pantalla completa.
+        </div>
+      </TweaksPanel>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

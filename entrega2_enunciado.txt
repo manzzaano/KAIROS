@@ -1,0 +1,21 @@
+🟡 Entrega 2 – Aplicación funcional (20%)
+📄 Formato de entrega:
+
+Se entregará únicamente un PDF con evidencias.
+📌 El PDF deberá incluir:
+
+    Capturas de todas las funcionalidades principales
+    Explicación del flujo completo de la aplicación
+    Fragmentos de código clave
+    Evidencias de uso de datos reales o integración (Firebase, API, etc.)
+    Evidencias claras del backend (lectura/escritura de datos, IA, servicios, etc.)
+    Identificación del alumnado.
+
+🎯 Requisitos:
+
+    Funcionalidades principales implementadas
+    Navegación completa
+    Validaciones básicas
+    Flujo de uso coherente
+
+Se permiten pequeños errores o aspectos sin pulir.

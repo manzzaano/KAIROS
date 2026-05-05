@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:api.anthropic.com)",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\Ismael\\\\Desktop\\\\KAIROS\\\\design_extracted\" -Recurse -Force | ForEach-Object { \"$\\($_.FullName\\) [$\\($_.Length\\)]\" })",
+      "PowerShell(New-Item *)",
+      "Bash(flutter create *)",
+      "Read(//c/c/Users/Ismael/Desktop/KAIROS/**)",
+      "Read(//c/c/Users/Ismael/Desktop/KAIROS/kairos/**)",
+      "Bash(flutter pub *)",
+      "Bash(flutter doctor *)",
+      "Bash(flutter --version)",
+      "Bash(flutter analyze *)"
+    ]
+  }
+}
