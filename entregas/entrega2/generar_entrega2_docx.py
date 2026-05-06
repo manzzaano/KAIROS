@@ -454,5 +454,5 @@ if __name__ == "__main__":
 
     # Guardar
     doc.save(str(OUTPUT))
-    print(f"✅ Documento generado: {OUTPUT}")
-    print(f"📊 Tamaño: {OUTPUT.stat().st_size / 1024:.1f} KB")
+    print(f"[OK] Documento generado: {OUTPUT}")
+    print(f"[SIZE] {OUTPUT.stat().st_size / 1024:.1f} KB")
